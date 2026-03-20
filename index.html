@@ -1188,6 +1188,8 @@ window.delExp=async(id,amount)=>{
   await update(ref(db,`trips/${currentTripId}`),{spent:Math.max(0,(currentTrip.spent||0)-amount)});
 };
 
+// ── CONDIVIDI ─────────────────────────────────────────────────────────────────
+
 </script>
 </body>
 </html>
