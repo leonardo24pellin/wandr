@@ -2,426 +2,402 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="theme-color" content="#1a73e8"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<title>Wandr — Travel Planner</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Wandr</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 :root{
-  --blue:#1a73e8; --blue2:#1557b0; --blue-light:#e8f0fe;
-  --green:#34a853; --green-light:#e6f4ea;
-  --orange:#fa7b17; --orange-light:#fce8d4;
-  --red:#ea4335; --purple:#9334e6; --purple-light:#f3e8fd;
-  --yellow:#fbbc04; --yellow-light:#fef9e0;
-  --ink:#1f2937; --ink2:#374151; --ink3:#6b7280;
-  --border:#e5e7eb; --border2:#d1d5db;
-  --surface:#f9fafb; --surface2:#f3f4f6; --white:#ffffff;
-  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
-  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
-  --shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);
-  --r:12px; --rs:8px; --r2:20px;
+  --blue:#1a73e8;--blue2:#1557b0;--blue-light:#e8f0fe;
+  --green:#34a853;--red:#ea4335;--orange:#fa7b17;--purple:#7c3aed;
+  --ink:#111827;--ink2:#374151;--ink3:#6b7280;--ink4:#9ca3af;
+  --border:#e5e7eb;--surface:#f9fafb;--surface2:#f3f4f6;--white:#fff;
+  --shadow:0 1px 3px rgba(0,0,0,.1);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 24px rgba(0,0,0,.12);--shadow-xl:0 20px 40px rgba(0,0,0,.15);
+  --r:14px;--rs:10px;--r2:22px;
   --f:"Plus Jakarta Sans",system-ui,sans-serif;
-  --sidebar:260px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:var(--f);color:var(--ink);-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:var(--f);color:var(--ink);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 body{background:var(--surface)}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+::-webkit-scrollbar{display:none}
 
-/* ── App shell ── */
-#app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+/* ── Shell ── */
+#app{display:flex;flex-direction:column;height:100dvh;overflow:hidden;position:relative}
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden}
 .screen.active{display:flex}
 
 /* ── Buttons ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:99px;font-family:var(--f);font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .18s;white-space:nowrap;text-decoration:none}
-.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.btn-white{background:#fff;color:var(--ink);border:1.5px solid var(--border)}.btn-white:hover{background:var(--surface2);border-color:var(--border2)}
-.btn-ghost{background:transparent;color:var(--ink3)}.btn-ghost:hover{background:var(--surface2);color:var(--ink)}
-.btn-ai{background:linear-gradient(135deg,#7c3aed,#1a73e8);color:#fff}.btn-ai:hover{opacity:.92;transform:translateY(-1px)}
-.btn-danger{background:#fef2f2;color:var(--red);border:1px solid #fecaca}.btn-danger:hover{background:#fee2e2}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
-.icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .15s;color:var(--ink2)}.icon-btn:hover{background:var(--surface2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;height:44px;border-radius:99px;font-family:var(--f);font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;min-width:44px}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:active{background:var(--blue2)}
+.btn-white{background:#fff;color:var(--ink);border:1.5px solid var(--border)}.btn-white:active{background:var(--surface2)}
+.btn-ghost{background:transparent;color:var(--ink2)}.btn-ghost:active{background:var(--surface2)}
+.btn-ai{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}.btn-ai:active{opacity:.85}
+.btn-red{background:#fef2f2;color:var(--red);border:1.5px solid #fecaca}.btn-red:active{background:#fee2e2}
+.btn-green{background:#dcfce7;color:var(--green);border:1.5px solid #86efac}.btn-green:active{background:#bbf7d0}
+.btn:disabled{opacity:.4;pointer-events:none}
+.icon-btn{width:44px;height:44px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink2)}.icon-btn:active{background:var(--surface2)}
 
 /* ── Inputs ── */
-.inp{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--f);font-size:14px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s}
-.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1)}
-select.inp{cursor:pointer} textarea.inp{resize:vertical;min-height:72px}
-.inp-label{font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:4px}
+.inp{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--f);font-size:16px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+select.inp{cursor:pointer}
+textarea.inp{resize:none;min-height:80px;font-size:15px}
+.inp-label{font-size:13px;font-weight:700;color:var(--ink2);display:block;margin-bottom:5px}
 
 /* ── Cards ── */
 .card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--border)}
 
 /* ── Modal ── */
-.overlay{position:fixed;inset:0;background:rgba(17,24,39,.4);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;animation:fi .2s}
-.modal{background:#fff;border-radius:var(--r2);padding:28px;width:100%;max-width:540px;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:fu .25s}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;padding:0;animation:fi .2s}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:0;width:100%;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slide-up .3s cubic-bezier(.32,1,.42,1);padding-bottom:calc(20px + var(--safe-bottom))}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0}
+.modal-body{padding:20px 20px 0}
+.modal-title{font-size:20px;font-weight:800;margin-bottom:18px}
 
 /* ── HOME ── */
-#home{background:var(--surface)}
-.home-nav{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;flex-shrink:0}
-.home-nav h1{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;padding:28px;max-width:1200px;margin:0 auto;width:100%}
-.trip-hero{height:140px;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(135deg,var(--blue),var(--purple));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:56px}
-.trip-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.3))}
-.trip-card-body{padding:16px}
-.trip-card-wrap{cursor:pointer;transition:transform .2s,box-shadow .2s;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-md);background:#fff}
-.trip-card-wrap:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.home-nav{background:#fff;padding:calc(var(--safe-top) + 14px) 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.home-logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.trips-list{flex:1;overflow-y:auto;padding:16px}
+.trip-card{border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-md);cursor:pointer;transition:transform .15s;background:#fff;position:relative}
+.trip-card:active{transform:scale(.98)}
+.trip-hero{height:160px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px}
+.trip-hero-emoji{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);font-size:64px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.trip-hero-info{position:relative;z-index:1}
+.trip-hero-info h3{color:#fff;font-size:19px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.trip-hero-info p{color:rgba(255,255,255,.85);font-size:13px;margin-top:2px}
+.trip-card-footer{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.trip-delete-btn{position:absolute;top:12px;right:12px;z-index:10;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;backdrop-filter:blur(4px)}
 
-/* ── TRIP LAYOUT ── */
-#trip{flex-direction:row!important}
-
-/* Sidebar */
-.sidebar{width:var(--sidebar);background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
-.sidebar-top{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.sidebar-trip-name{font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-days{flex:1;overflow-y:auto;padding:8px}
-.day-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;margin-bottom:2px;position:relative}
-.day-item:hover{background:var(--surface2)}
-.day-item.active{background:var(--blue-light)}
-.day-item.active .day-num-dot{background:var(--blue);color:#fff}
-.day-item.active .day-item-label{color:var(--blue);font-weight:700}
-.day-num-dot{width:28px;height:28px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink2);flex-shrink:0}
-.day-item-label{font-size:13px;font-weight:500;color:var(--ink2)}
-.day-item-date{font-size:11px;color:var(--ink3);margin-top:1px}
-.day-item-count{font-size:10px;color:var(--ink3);margin-left:auto}
-.sidebar-bottom{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
-
-/* Main content */
-.trip-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+/* ── TRIP SHELL ── */
+/* Bottom tab bar */
+.bottom-tabs{background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);flex-shrink:0;position:relative;z-index:10}
+.bottom-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;border:none;background:transparent;font-family:var(--f);color:var(--ink4);transition:color .15s;font-size:10px;font-weight:600;gap:3px}
+.bottom-tab .tab-icon{font-size:20px;transition:transform .15s}
+.bottom-tab.active{color:var(--blue)}.bottom-tab.active .tab-icon{transform:scale(1.15)}
 
 /* Trip header */
-.trip-header{background:#fff;border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.trip-tabs{display:flex;gap:2px;background:var(--surface2);border-radius:99px;padding:3px}
-.trip-tab{padding:7px 16px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--ink3);transition:all .15s;font-family:var(--f)}
-.trip-tab.active{background:#fff;color:var(--blue);box-shadow:var(--shadow)}
+.trip-header{background:#fff;padding:calc(var(--safe-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.trip-header-info{flex:1;min-width:0}
+.trip-header-info h1{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-header-info p{font-size:12px;color:var(--ink3);margin-top:1px}
 
-/* Day view */
-.day-view{flex:1;display:flex;overflow:hidden}
-.day-timeline{width:380px;flex-shrink:0;overflow-y:auto;padding:20px;border-right:1px solid var(--border);background:#fff}
-.day-map{flex:1;position:relative}
-#map{height:100%;width:100%}
+/* ── TAB: ITINERARIO ── */
+#tab-itinerary{flex:1;overflow:hidden;display:flex;flex-direction:column}
+/* Day selector horizontal scroll */
+.day-selector{background:#fff;border-bottom:1px solid var(--border);padding:10px 0;flex-shrink:0}
+.day-selector-inner{display:flex;gap:8px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.day-chip{flex-shrink:0;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--ink3);transition:all .15s;font-family:var(--f);text-align:center}
+.day-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.day-chip-date{font-size:10px;font-weight:500;display:block;margin-top:1px;opacity:.75}
 
-/* Timeline */
-.timeline-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.timeline-title{font-size:18px;font-weight:800;color:var(--ink)}
-.timeline-date{font-size:12px;color:var(--ink3);font-weight:500}
-.timeline-body{position:relative;padding-left:36px}
-.timeline-line{position:absolute;left:13px;top:0;bottom:0;width:2px;background:var(--border);border-radius:99px}
-.tl-item{position:relative;margin-bottom:12px}
-.tl-dot{position:absolute;left:-30px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;z-index:1}
-.tl-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;transition:all .15s;cursor:default}
-.tl-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md)}
-.tl-card-img{height:100px;background:var(--surface2);position:relative;overflow:hidden}
-.tl-card-img img{width:100%;height:100%;object-fit:cover}
-.tl-card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px}
-.tl-card-body{padding:10px 12px}
-.tl-card-title{font-weight:700;font-size:14px;color:var(--ink);margin-bottom:4px}
-.tl-card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tl-meta-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--ink2)}
-.tl-card-addr{font-size:12px;color:var(--ink3);margin-top:4px;display:flex;align-items:center;gap:3px}
-.tl-card-notes{font-size:12px;color:var(--ink3);margin-top:4px;font-style:italic}
-/* Travel segment between activities */
-.tl-travel{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:12px;position:relative}
-.tl-travel-dot{position:absolute;left:-30px;width:24px;height:24px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px}
-.tl-travel-line{flex:1;height:1px;background:var(--border);border-top:1px dashed var(--border2)}
-.tl-travel-info{font-size:11px;color:var(--ink3);font-weight:500;white-space:nowrap}
+/* Day content: mappa sopra, timeline sotto */
+.day-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.day-map-container{height:220px;flex-shrink:0;position:relative}
+#day-map{height:100%;width:100%}
+.map-nav-btn{position:absolute;bottom:12px;right:12px;z-index:500;padding:0 16px;height:40px;border-radius:99px;background:var(--blue);color:#fff;border:none;font-family:var(--f);font-weight:700;font-size:13px;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:6px}
+.day-timeline{flex:1;overflow-y:auto;padding:16px}
 
-/* Placeholder day */
-.day-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:12px}
-.day-empty .ei{font-size:48px}
-.day-empty p{color:var(--ink3);font-size:14px}
+/* Activity cards */
+.act-wrap{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px}
+.act-line{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;padding-top:4px}
+.act-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid #fff;box-shadow:var(--shadow)}
+.act-connector{width:2px;flex:1;min-height:12px;background:var(--border);margin:3px 0;border-radius:99px}
+.act-card-inner{flex:1;background:#fff;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);margin-bottom:6px}
+.act-img{height:110px;overflow:hidden;position:relative;background:var(--surface2)}
+.act-img img{width:100%;height:100%;object-fit:cover}
+.act-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:42px}
+.act-body{padding:12px}
+.act-title{font-size:16px;font-weight:800;margin-bottom:6px}
+.act-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--ink2)}
+.act-addr{font-size:13px;color:var(--ink3);margin-top:4px;display:flex;align-items:flex-start;gap:4px}
+.act-notes{font-size:13px;color:var(--ink3);margin-top:6px;font-style:italic;line-height:1.4}
+.act-actions{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:var(--surface)}
 
-/* Map controls overlay */
-.map-overlay{position:absolute;top:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px}
-.map-overlay-btn{background:#fff;border:none;border-radius:10px;padding:8px 14px;font-family:var(--f);font-size:12px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:6px;color:var(--ink2);transition:all .15s}
-.map-overlay-btn:hover{background:var(--surface2);box-shadow:var(--shadow-lg)}
-.map-legend{background:#fff;border-radius:10px;padding:10px 12px;box-shadow:var(--shadow-md);font-size:11px}
-.map-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px;color:var(--ink2)}
-.map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* Travel connector */
+.travel-seg{display:flex;align-items:center;gap:8px;padding:4px 0;margin-left:42px;margin-bottom:6px}
+.travel-line{flex:1;height:1px;border-top:2px dashed var(--border)}
+.travel-info{font-size:12px;font-weight:600;color:var(--ink3);white-space:nowrap;background:var(--surface);padding:3px 8px;border-radius:99px;border:1px solid var(--border)}
 
-/* Budget tab */
-.budget-wrap{flex:1;overflow-y:auto;padding:24px;max-width:800px;margin:0 auto;width:100%}
+/* Add activity btn */
+.add-act-btn{margin:4px 0 20px 42px;display:flex;align-items:center;gap:8px;padding:14px;border-radius:var(--r);border:2px dashed var(--border);background:transparent;cursor:pointer;font-family:var(--f);font-size:15px;font-weight:600;color:var(--ink3);width:calc(100% - 42px);transition:all .15s}
+.add-act-btn:active{background:var(--surface2);border-color:var(--blue);color:var(--blue)}
 
-/* Places tab */
-.places-wrap{flex:1;overflow-y:auto;padding:24px;max-width:800px;margin:0 auto;width:100%}
+/* Day empty */
+.day-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px;text-align:center}
+.day-empty .ei{font-size:56px}
+.day-empty h3{font-size:18px;font-weight:800;color:var(--ink)}
+.day-empty p{font-size:14px;color:var(--ink3);line-height:1.5}
 
-/* AI panel */
-.ai-panel{background:linear-gradient(135deg,#f3e8ff,#e8f0fe);border:1px solid #c4b5fd;border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
-.ai-panel-title{font-weight:700;font-size:14px;color:#5b21b6;display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.sug-card{display:flex;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all .15s;margin-bottom:7px}
-.sug-card:hover,.sug-card.sel{border-color:var(--blue);background:var(--blue-light)}
-.sug-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s}
-.sug-card.sel .sug-check{background:var(--blue);border-color:var(--blue);color:#fff}
-.zone-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#ede9fe;color:#6d28d9;margin-left:6px}
-.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── NAVIGAZIONE GUIDATA (fullscreen) ── */
+#nav-screen{position:fixed;inset:0;z-index:500;background:#000;display:none;flex-direction:column}
+#nav-screen.active{display:flex}
+#nav-map-full{flex:1}
+.nav-bottom-sheet{background:#fff;border-radius:24px 24px 0 0;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
+.nav-step-num{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.nav-step-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.nav-step-addr{font-size:15px;color:var(--ink3);margin-bottom:16px;display:flex;align-items:center;gap:4px}
+.nav-actions{display:flex;gap:10px}
+.nav-progress{display:flex;gap:4px;justify-content:center;margin-bottom:14px}
+.nav-prog-dot{height:4px;border-radius:99px;background:var(--border);transition:all .3s;flex:1}
+.nav-prog-dot.done{background:var(--green)}
+.nav-prog-dot.current{background:var(--blue)}
+.nav-close-btn{position:absolute;top:calc(var(--safe-top) + 12px);left:12px;z-index:10;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;backdrop-filter:blur(4px)}
 
-/* Stat cards */
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center}
-.stat-val{font-size:22px;font-weight:800;margin-bottom:2px}
-.stat-lbl{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em}
-
-/* Progress */
-.prog{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+/* ── TAB: BUDGET ── */
+#tab-budget{flex:1;overflow-y:auto;padding:16px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px 10px;text-align:center}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px}
+.stat-lbl{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
+.prog{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden}
 .prog-fill{height:100%;border-radius:99px;transition:width .5s}
+.list-item{display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border-radius:var(--r);border:1px solid var(--border);margin-bottom:8px}
+.list-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 
-/* Expense / Place cards */
-.list-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border-radius:var(--r);border:1px solid var(--border);margin-bottom:8px}
-.list-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-
-/* Type pills */
-.type-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.type-pill{padding:5px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f);transition:all .15s}
-
-/* Emoji grid */
+/* ── Emoji & type pills ── */
 .emoji-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.emoji-btn{width:42px;height:42px;border-radius:10px;border:2px solid transparent;background:var(--surface2);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.emoji-btn{width:44px;height:44px;border-radius:10px;border:2px solid transparent;background:var(--surface2);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .emoji-btn.sel{border-color:var(--blue);background:var(--blue-light)}
+.type-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.type-pill{padding:9px 14px;border-radius:99px;border:2px solid var(--border);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)}
 
-/* Share code */
-.share-code{background:var(--ink);color:#fff;padding:20px;border-radius:14px;font-size:32px;font-weight:800;letter-spacing:.25em;font-family:monospace;text-align:center}
+/* ── Gradient hero presets ── */
+.gh-0{background:linear-gradient(135deg,#1a73e8,#7c3aed)}
+.gh-1{background:linear-gradient(135deg,#34a853,#1a73e8)}
+.gh-2{background:linear-gradient(135deg,#fa7b17,#ea4335)}
+.gh-3{background:linear-gradient(135deg,#7c3aed,#ec4899)}
+.gh-4{background:linear-gradient(135deg,#fbbc04,#fa7b17)}
+.gh-5{background:linear-gradient(135deg,#0ea5e9,#34a853)}
 
-/* Gradient heroes per i viaggi */
-.hero-0{background:linear-gradient(135deg,#1a73e8,#7c3aed)}
-.hero-1{background:linear-gradient(135deg,#34a853,#1a73e8)}
-.hero-2{background:linear-gradient(135deg,#fa7b17,#ea4335)}
-.hero-3{background:linear-gradient(135deg,#9334e6,#ea4335)}
-.hero-4{background:linear-gradient(135deg,#fbbc04,#fa7b17)}
-.hero-5{background:linear-gradient(135deg,#1a73e8,#34a853)}
+/* ── AI suggestions ── */
+.ai-wrap{background:linear-gradient(135deg,#f5f3ff,#eff6ff);border:1.5px solid #c4b5fd;border-radius:var(--r);padding:14px;margin-bottom:14px}
+.ai-title{font-weight:800;font-size:14px;color:#5b21b6;display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.sug-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:10px;border:2px solid var(--border);background:#fff;cursor:pointer;margin-bottom:8px;transition:all .15s}
+.sug-item.sel{border-color:var(--blue);background:var(--blue-light)}
+.sug-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.sug-item.sel .sug-check{background:var(--blue);border-color:var(--blue);color:#fff}
+.zone-badge{display:inline-flex;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;background:#ede9fe;color:#6d28d9}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 
-/* Responsive mobile */
-@media(max-width:768px){
-  #trip{flex-direction:column!important}
-  .sidebar{width:100%;max-height:180px;border-right:none;border-bottom:1px solid var(--border);flex-direction:row}
-  .sidebar-days{display:flex;flex-direction:row;gap:6px;padding:8px;overflow-x:auto;overflow-y:hidden}
-  .day-item{flex-direction:column;gap:3px;min-width:64px;text-align:center;padding:8px}
-  .day-item-count{margin-left:0}
-  .sidebar-bottom{display:none}
-  .sidebar-top{border-bottom:none;border-right:1px solid var(--border)}
-  .day-view{flex-direction:column}
-  .day-timeline{width:100%;max-height:50%;border-right:none;border-bottom:1px solid var(--border)}
-  .day-map{min-height:250px}
-  .trips-grid{padding:16px;grid-template-columns:1fr}
-}
+/* ── Share code ── */
+.share-code{background:var(--ink);color:#fff;padding:20px;border-radius:14px;font-size:32px;font-weight:800;letter-spacing:.25em;font-family:monospace;text-align:center;margin-bottom:16px}
 
 /* Animations */
-@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fi{from{opacity:0}to{opacity:1}}
-@keyframes sl{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .fa{animation:fu .3s ease both}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- ═══════════════ HOME ═══════════════ -->
+<!-- ══ HOME ══ -->
 <div id="home" class="screen active">
-  <nav class="home-nav">
-    <h1>✈ Wandr</h1>
-    <button class="btn btn-blue" id="btn-new-trip">+ Nuovo viaggio</button>
-  </nav>
-  <div style="flex:1;overflow-y:auto">
-    <div class="trips-grid" id="trips-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink3)">
-        <div style="font-size:56px;margin-bottom:12px">🗺️</div>
-        <p style="font-size:16px;font-weight:600;margin-bottom:6px">Nessun viaggio ancora</p>
-        <p style="font-size:14px">Crea il tuo primo itinerario!</p>
-      </div>
+  <div class="home-nav">
+    <span class="home-logo">✈ Wandr</span>
+    <button class="btn btn-blue" id="btn-new-trip" style="height:40px;font-size:14px">+ Nuovo</button>
+  </div>
+  <div class="trips-list" id="trips-list">
+    <div style="text-align:center;padding:60px 20px;color:var(--ink3)">
+      <div style="font-size:56px;margin-bottom:12px">🗺️</div>
+      <p style="font-size:17px;font-weight:700;margin-bottom:6px">Nessun viaggio ancora</p>
+      <p style="font-size:14px">Crea il tuo primo itinerario!</p>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ TRIP ═══════════════ -->
+<!-- ══ TRIP ══ -->
 <div id="trip" class="screen">
-
-  <!-- Sidebar giorni -->
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <button class="icon-btn" id="btn-back" title="Torna home">←</button>
-      <div style="flex:1;min-width:0">
-        <div class="sidebar-trip-name" id="sb-trip-name"></div>
-        <div style="font-size:11px;color:var(--ink3)" id="sb-trip-dest"></div>
-      </div>
+  <div class="trip-header">
+    <button class="icon-btn" id="btn-back">←</button>
+    <div class="trip-header-info">
+      <h1 id="th-title"></h1>
+      <p id="th-sub"></p>
     </div>
-    <div class="sidebar-days" id="sidebar-days"></div>
-    <div class="sidebar-bottom">
-      <button class="btn btn-ai" id="btn-ai-full" style="font-size:12px;padding:8px 14px">✨ Pianifica tutto</button>
-      <button class="btn btn-white" id="btn-share-trip" style="font-size:12px;padding:8px 14px">🔗 Condividi</button>
-    </div>
-  </aside>
+    <button class="icon-btn" id="btn-trip-share">🔗</button>
+  </div>
 
-  <!-- Main -->
-  <div class="trip-main">
-    <!-- Header tabs -->
-    <div class="trip-header">
-      <div class="trip-tabs">
-        <button class="trip-tab active" data-tab="day">📅 Giornata</button>
-        <button class="trip-tab" data-tab="places">📍 Posti</button>
-        <button class="trip-tab" data-tab="budget">💰 Budget</button>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <span id="hdr-budget-pill" style="font-size:12px;font-weight:600;color:var(--ink3);display:none"></span>
-      </div>
-    </div>
+  <!-- TAB CONTENT AREA -->
+  <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
 
-    <!-- TAB: Giornata -->
-    <div id="tab-day" class="tab-pane" style="display:flex;flex:1;overflow:hidden">
-      <div class="day-timeline" id="day-timeline">
+    <!-- ITINERARIO -->
+    <div id="tab-itinerary" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="day-selector">
+        <div class="day-selector-inner" id="day-selector-inner"></div>
+      </div>
+      <div class="day-content" id="day-content">
         <div class="day-empty">
           <div class="ei">📅</div>
-          <p>Seleziona un giorno dalla barra laterale</p>
-        </div>
-      </div>
-      <div class="day-map">
-        <div id="map"></div>
-        <div class="map-overlay">
-          <button class="map-overlay-btn" id="btn-fit-map">🎯 Centra mappa</button>
-          <div class="map-legend" id="map-legend" style="display:none"></div>
+          <h3>Nessun giorno</h3>
+          <p>Crea un viaggio per iniziare</p>
         </div>
       </div>
     </div>
 
-    <!-- TAB: Posti -->
-    <div id="tab-places" class="tab-pane" style="display:none;flex:1;overflow:hidden">
-      <div class="places-wrap">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-          <h2 style="font-size:20px;font-weight:800">Lista dei posti</h2>
-          <button class="btn btn-blue" onclick="openModal('place')" style="font-size:12px">+ Aggiungi posto</button>
-        </div>
-        <div style="display:flex;gap:6px;margin-bottom:16px">
-          <button class="btn btn-blue" id="pf-all" style="font-size:12px;padding:7px 14px" onclick="filterPlaces('all')">Tutti</button>
-          <button class="btn btn-white" id="pf-todo" style="font-size:12px;padding:7px 14px" onclick="filterPlaces('todo')">Da visitare</button>
-          <button class="btn btn-white" id="pf-visited" style="font-size:12px;padding:7px 14px" onclick="filterPlaces('visited')">Visitati ✓</button>
-        </div>
-        <div class="stat-row" id="places-stats"></div>
-        <div id="places-list"></div>
+    <!-- BUDGET -->
+    <div id="tab-budget" style="display:none;flex:1;overflow-y:auto;padding:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h2 style="font-size:20px;font-weight:800">Budget</h2>
+        <button class="btn btn-blue" onclick="openModal('expense')" style="height:38px;font-size:13px">+ Spesa</button>
       </div>
-    </div>
-
-    <!-- TAB: Budget -->
-    <div id="tab-budget" class="tab-pane" style="display:none;flex:1;overflow:hidden">
-      <div class="budget-wrap">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-          <h2 style="font-size:20px;font-weight:800">Budget del viaggio</h2>
-          <button class="btn btn-blue" onclick="openModal('expense')" style="font-size:12px">+ Aggiungi spesa</button>
-        </div>
-        <div class="stat-row" id="budget-stats"></div>
-        <div id="budget-prog" style="margin-bottom:20px;display:none"></div>
-        <div id="budget-cats" style="margin-bottom:20px"></div>
-        <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">Tutte le spese</h3>
-        <div id="expenses-list"></div>
-      </div>
+      <div class="stat-row" id="budget-stats"></div>
+      <div id="budget-prog" style="margin-bottom:16px"></div>
+      <div id="budget-cats" style="margin-bottom:16px"></div>
+      <div id="expenses-list"></div>
     </div>
 
   </div>
-</div>
+
+  <!-- Bottom tab bar -->
+  <div class="bottom-tabs">
+    <button class="bottom-tab active" data-tab="itinerary">
+      <span class="tab-icon">📅</span>Itinerario
+    </button>
+    <button class="bottom-tab" data-tab="budget">
+      <span class="tab-icon">💰</span>Budget
+    </button>
+  </div>
 </div>
 
-<!-- ═══════════════ MODALS ═══════════════ -->
+<!-- ══ NAVIGAZIONE GUIDATA ══ -->
+<div id="nav-screen">
+  <button class="nav-close-btn" id="nav-close">✕</button>
+  <div id="nav-map-full"></div>
+  <div class="nav-bottom-sheet">
+    <div class="nav-progress" id="nav-progress"></div>
+    <div class="nav-step-num" id="nav-step-num"></div>
+    <div class="nav-step-title" id="nav-step-title"></div>
+    <div class="nav-step-addr" id="nav-step-addr"></div>
+    <div class="nav-actions">
+      <button class="btn btn-white" id="nav-btn-maps" style="flex:1;font-size:14px">🗺️ Apri in Maps</button>
+      <button class="btn btn-green" id="nav-btn-done" style="flex:2;font-size:14px">✓ Fatto! Prossimo →</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<!-- ══ MODALS ══ -->
 
 <!-- Nuovo viaggio -->
 <div id="modal-trip" class="overlay" style="display:none" onclick="closeBg(event,'modal-trip')">
   <div class="modal">
-    <h2 style="font-size:22px;font-weight:800;margin-bottom:20px">Nuovo viaggio ✈️</h2>
-    <div class="emoji-grid" id="trip-emojis"></div>
-    <div style="display:grid;gap:12px">
-      <div><label class="inp-label">Titolo *</label><input class="inp" id="t-title" placeholder="Es. Tokyo Adventure"/></div>
-      <div><label class="inp-label">Destinazione *</label><input class="inp" id="t-dest" placeholder="Es. Tokyo, Giappone"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label class="inp-label">Partenza</label><input class="inp" type="date" id="t-start"/></div>
-        <div><label class="inp-label">Ritorno</label><input class="inp" type="date" id="t-end"/></div>
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div class="modal-title">Nuovo viaggio ✈️</div>
+      <div class="emoji-grid" id="trip-emojis"></div>
+      <div style="display:grid;gap:12px;margin-bottom:20px">
+        <div><label class="inp-label">Titolo *</label><input class="inp" id="t-title" placeholder="Es. Tokyo Adventure"/></div>
+        <div><label class="inp-label">Destinazione *</label><input class="inp" id="t-dest" placeholder="Es. Tokyo, Giappone"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label class="inp-label">Partenza</label><input class="inp" type="date" id="t-start"/></div>
+          <div><label class="inp-label">Ritorno</label><input class="inp" type="date" id="t-end"/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+          <div><label class="inp-label">Valuta</label>
+            <select class="inp" id="t-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>JPY</option><option>CHF</option><option>CAD</option></select>
+          </div>
+          <div><label class="inp-label">Budget (opz.)</label><input class="inp" type="number" id="t-budget" placeholder="0"/></div>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px">
-        <div><label class="inp-label">Valuta</label><select class="inp" id="t-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>JPY</option><option>CHF</option><option>CAD</option></select></div>
-        <div><label class="inp-label">Budget totale (opz.)</label><input class="inp" type="number" id="t-budget" placeholder="0"/></div>
+      <div style="display:flex;gap:10px;padding-bottom:4px">
+        <button class="btn btn-white" onclick="closeModal('modal-trip')" style="flex:1">Annulla</button>
+        <button class="btn btn-blue" id="btn-create-trip" style="flex:2">Crea viaggio 🚀</button>
       </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:22px">
-      <button class="btn btn-white" onclick="closeModal('modal-trip')" style="flex:1">Annulla</button>
-      <button class="btn btn-blue" id="btn-create-trip" style="flex:2">Crea viaggio 🚀</button>
+  </div>
+</div>
+
+<!-- Elimina viaggio confirm -->
+<div id="modal-del-trip" class="overlay" style="display:none" onclick="closeBg(event,'modal-del-trip')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-body" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🗑️</div>
+      <div class="modal-title">Elimina viaggio?</div>
+      <p style="color:var(--ink3);font-size:15px;margin-bottom:24px">Questa azione è irreversibile. Tutte le attività, spese e dati verranno eliminati.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-white" onclick="closeModal('modal-del-trip')" style="flex:1">Annulla</button>
+        <button class="btn" id="btn-confirm-del" style="flex:1;background:var(--red);color:#fff">Elimina</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Condividi -->
 <div id="modal-share" class="overlay" style="display:none" onclick="closeBg(event,'modal-share')">
-  <div class="modal" style="text-align:center;max-width:400px">
-    <div style="font-size:48px;margin-bottom:12px">🔗</div>
-    <h2 style="font-size:22px;font-weight:800;margin-bottom:6px">Condividi il viaggio</h2>
-    <p style="color:var(--ink3);font-size:14px;margin-bottom:20px">Chiunque abbia questo codice può aprire il viaggio</p>
-    <div class="share-code" id="share-code-display"></div>
-    <button class="btn btn-blue" onclick="copyCode()" style="margin-top:16px;width:100%">📋 Copia codice</button>
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="modal-title">Condividi il viaggio 🔗</div>
+      <p style="color:var(--ink3);font-size:14px;margin-bottom:18px">Chiunque abbia questo codice può aprire il viaggio</p>
+      <div class="share-code" id="share-code-display"></div>
+      <button class="btn btn-blue" onclick="copyCode()" style="width:100%">📋 Copia codice</button>
+    </div>
   </div>
 </div>
 
 <!-- Aggiungi attività -->
 <div id="modal-activity" class="overlay" style="display:none" onclick="closeBg(event,'modal-activity')">
   <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="font-size:18px;font-weight:800">Aggiungi attività</h3>
-      <button class="btn btn-ai" id="btn-ai-day" style="font-size:12px;padding:7px 14px">✨ Suggerisci AI</button>
-    </div>
-    <!-- AI area -->
-    <div id="ai-day-area" style="display:none;margin-bottom:16px">
-      <div id="ai-day-content"></div>
-      <div id="ai-day-actions" style="display:none;margin-top:10px">
-        <button class="btn btn-blue" id="btn-add-selected" style="width:100%;font-size:13px">Aggiungi selezionate ✓</button>
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" style="margin-bottom:0">Aggiungi attività</div>
+        <button class="btn btn-ai" id="btn-ai-day" style="height:38px;font-size:13px">✨ AI</button>
       </div>
-    </div>
-    <div id="manual-form">
-      <p style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:500">...oppure aggiungi manualmente:</p>
-      <div class="type-pills" id="act-type-pills"></div>
-      <div style="display:grid;gap:10px">
-        <div><label class="inp-label">Titolo *</label><input class="inp" id="a-title" placeholder="Es. Visita al Colosseo"/></div>
-        <div><label class="inp-label">Luogo / indirizzo</label><input class="inp" id="a-address" placeholder="Es. Piazza del Colosseo, Roma"/></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div><label class="inp-label">Orario</label><input class="inp" type="time" id="a-time" value="09:00"/></div>
-          <div><label class="inp-label">Durata (min)</label><input class="inp" type="number" id="a-duration" value="60"/></div>
-          <div><label class="inp-label">Costo (€)</label><input class="inp" type="number" id="a-cost" value="0"/></div>
+
+      <!-- AI area -->
+      <div id="ai-day-area" style="display:none;margin-bottom:14px">
+        <div id="ai-day-content"></div>
+        <button class="btn btn-blue" id="btn-add-sel" style="width:100%;display:none;margin-top:8px">Aggiungi selezionate ✓</button>
+      </div>
+
+      <!-- Manuale -->
+      <div id="manual-form">
+        <p style="font-size:12px;color:var(--ink3);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">O aggiungi manualmente</p>
+        <div class="type-pills" id="act-type-pills"></div>
+        <div style="display:grid;gap:11px;margin-bottom:18px">
+          <div><label class="inp-label">Titolo *</label><input class="inp" id="a-title" placeholder="Es. Colosseo"/></div>
+          <div><label class="inp-label">Luogo / indirizzo</label><input class="inp" id="a-address" placeholder="Es. Piazza del Colosseo, Roma"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div><label class="inp-label">Orario</label><input class="inp" type="time" id="a-time" value="09:00"/></div>
+            <div><label class="inp-label">Durata(min)</label><input class="inp" type="number" id="a-duration" value="60"/></div>
+            <div><label class="inp-label">Costo(€)</label><input class="inp" type="number" id="a-cost" value="0"/></div>
+          </div>
+          <div><label class="inp-label">Note</label><textarea class="inp" id="a-notes" placeholder="Orari, consigli, prenotazioni..."></textarea></div>
         </div>
-        <div><label class="inp-label">Note</label><textarea class="inp" id="a-notes" placeholder="Descrizione, orari di apertura..."></textarea></div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btn btn-white" onclick="closeModal('modal-activity')" style="flex:1">Chiudi</button>
-        <button class="btn btn-blue" id="btn-save-act" style="flex:2">Aggiungi ✓</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-white" onclick="closeModal('modal-activity')" style="flex:1">Chiudi</button>
+          <button class="btn btn-blue" id="btn-save-act" style="flex:2">Aggiungi ✓</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- AI Piano completo -->
+<!-- AI piano completo -->
 <div id="modal-ai-trip" class="overlay" style="display:none" onclick="closeBg(event,'modal-ai-trip')">
-  <div class="modal" style="max-width:640px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <h3 style="font-size:18px;font-weight:800">✨ Piano AI per tutto il viaggio</h3>
-      <button class="icon-btn" onclick="closeModal('modal-ai-trip')">✕</button>
-    </div>
-    <div id="ai-trip-content"></div>
-    <div id="ai-trip-actions" style="display:none;margin-top:16px;display:flex;gap:10px">
-      <button class="btn btn-white" onclick="closeModal('modal-ai-trip')" style="flex:1">Chiudi</button>
-      <button class="btn btn-blue" id="btn-apply-plan" style="flex:2">Aggiungi tutto all'itinerario 🚀</button>
-    </div>
-  </div>
-</div>
-
-<!-- Posto -->
-<div id="modal-place" class="overlay" style="display:none" onclick="closeBg(event,'modal-place')">
-  <div class="modal">
-    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px">Aggiungi un posto 📍</h3>
-    <div class="type-pills" id="place-cat-pills"></div>
-    <div style="display:grid;gap:10px">
-      <div><label class="inp-label">Nome *</label><input class="inp" id="p-name"/></div>
-      <div><label class="inp-label">Indirizzo</label><input class="inp" id="p-address"/></div>
-      <div><label class="inp-label">Note</label><textarea class="inp" id="p-notes"></textarea></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn btn-white" onclick="closeModal('modal-place')" style="flex:1">Annulla</button>
-      <button class="btn btn-blue" id="btn-save-place" style="flex:2">Aggiungi ✓</button>
+  <div class="modal" style="max-height:88dvh">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="modal-title" style="margin-bottom:0">✨ Piano AI</div>
+        <button class="icon-btn" onclick="closeModal('modal-ai-trip')">✕</button>
+      </div>
+      <div id="ai-trip-content"></div>
+      <div id="ai-trip-actions" style="display:none;gap:10px;margin-top:14px">
+        <button class="btn btn-white" onclick="closeModal('modal-ai-trip')" style="flex:1">Chiudi</button>
+        <button class="btn btn-blue" id="btn-apply-plan" style="flex:2">Aggiungi tutto 🚀</button>
+      </div>
     </div>
   </div>
 </div>
@@ -429,19 +405,21 @@ select.inp{cursor:pointer} textarea.inp{resize:vertical;min-height:72px}
 <!-- Spesa -->
 <div id="modal-expense" class="overlay" style="display:none" onclick="closeBg(event,'modal-expense')">
   <div class="modal">
-    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px">Aggiungi spesa 💳</h3>
-    <div class="type-pills" id="exp-cat-pills"></div>
-    <div style="display:grid;gap:10px">
-      <div><label class="inp-label">Descrizione *</label><input class="inp" id="e-title"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><label class="inp-label">Importo</label><input class="inp" type="number" step="0.01" id="e-amount"/></div>
-        <div><label class="inp-label">Data</label><input class="inp" type="date" id="e-date"/></div>
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div class="modal-title">Aggiungi spesa 💳</div>
+      <div class="type-pills" id="exp-cat-pills"></div>
+      <div style="display:grid;gap:11px;margin-bottom:18px">
+        <div><label class="inp-label">Descrizione *</label><input class="inp" id="e-title"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label class="inp-label">Importo</label><input class="inp" type="number" step="0.01" id="e-amount"/></div>
+          <div><label class="inp-label">Data</label><input class="inp" type="date" id="e-date"/></div>
+        </div>
       </div>
-      <div><label class="inp-label">Note</label><textarea class="inp" id="e-notes"></textarea></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn btn-white" onclick="closeModal('modal-expense')" style="flex:1">Annulla</button>
-      <button class="btn btn-blue" id="btn-save-exp" style="flex:2">Aggiungi ✓</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-white" onclick="closeModal('modal-expense')" style="flex:1">Annulla</button>
+        <button class="btn btn-blue" id="btn-save-exp" style="flex:2">Aggiungi ✓</button>
+      </div>
     </div>
   </div>
 </div>
@@ -449,7 +427,7 @@ select.inp{cursor:pointer} textarea.inp{resize:vertical;min-height:72px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, push, update, remove, onValue, off, get }
+import { getDatabase,ref,set,push,update,remove,onValue,off,get }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const db = getDatabase(initializeApp({
@@ -462,7 +440,7 @@ const db = getDatabase(initializeApp({
 
 // ── Costanti ──────────────────────────────────────────────────────────────────
 const EMOJIS=["🌍","✈️","🏖️","🏔️","🌸","🗺️","🧳","🚂","⛵","🏛️","🌴","🎿","🏕️","🚗","🛳️"];
-const HEROES=["hero-0","hero-1","hero-2","hero-3","hero-4","hero-5"];
+const GH=["gh-0","gh-1","gh-2","gh-3","gh-4","gh-5"];
 const ACT_TYPES=[
   {v:"transport",l:"Trasporto",e:"🚆",c:"#6366f1",bg:"#ede9fe"},
   {v:"accommodation",l:"Alloggio",e:"🏨",c:"#0ea5e9",bg:"#e0f2fe"},
@@ -472,19 +450,11 @@ const ACT_TYPES=[
   {v:"shopping",l:"Shopping",e:"🛍️",c:"#8b5cf6",bg:"#ede9fe"},
   {v:"other",l:"Altro",e:"📌",c:"#6b7280",bg:"#f3f4f6"},
 ];
-const PLACE_CATS=[
-  {v:"attraction",l:"Attrazione",e:"🏛️"},{v:"restaurant",l:"Ristorante",e:"🍽️"},
-  {v:"hotel",l:"Alloggio",e:"🏨"},{v:"museum",l:"Museo",e:"🖼️"},
-  {v:"nature",l:"Natura",e:"🌿"},{v:"shopping",l:"Shopping",e:"🛍️"},
-  {v:"bar",l:"Bar",e:"🍹"},{v:"other",l:"Altro",e:"📌"},
-];
 const EXP_CATS=[
   {v:"transport",l:"Trasporto",e:"🚆",c:"#6366f1"},{v:"accommodation",l:"Alloggio",e:"🏨",c:"#0ea5e9"},
   {v:"food",l:"Cibo",e:"🍽️",c:"#f59e0b"},{v:"activities",l:"Attività",e:"🎯",c:"#10b981"},
   {v:"shopping",l:"Shopping",e:"🛍️",c:"#8b5cf6"},{v:"other",l:"Altro",e:"📌",c:"#6b7280"},
 ];
-
-// Immagini placeholder per tipo attività (Unsplash)
 const ACT_IMGS={
   transport:"https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&q=60",
   accommodation:"https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=60",
@@ -497,47 +467,56 @@ const ACT_IMGS={
 
 // ── Stato ─────────────────────────────────────────────────────────────────────
 let currentTripId=null,currentTrip=null,tripListener=null;
-let currentDayId=null,currentDayLabel="";
-let selEmoji="🌍",selActType="activity",selPlaceCat="attraction",selExpCat="food";
-let placesFilter="all",aiDaySugs=[],aiTripPlan=null;
-let leafletMap=null,leafletInited=false,routeLayer=null,markersLayer=null;
+let currentDayId=null;
+let selEmoji="🌍",selActType="activity",selExpCat="food";
+let aiDaySugs=[],aiTripPlan=null;
+let dayMap=null,dayMapInited=false,dayRouteLayer=null,dayMarkersLayer=null;
+let navMap=null,navMapInited=false,navSteps=[],navIndex=0,navRouteLayer=null;
+let tripToDelete=null;
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 buildEmojiGrid();
 buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
-buildPills("place-cat-pills",PLACE_CATS,v=>selPlaceCat=v,()=>selPlaceCat);
 buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
 loadTrips();
 
-// ── Helper UI ─────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
 window.closeModal=id=>document.getElementById(id).style.display="none";
 window.closeBg=(e,id)=>{if(e.target.id===id)closeModal(id);};
-window.openModal=(type,dayId,dayLabel)=>{
+window.openModal=(type,dayId)=>{
   if(type==="activity"){
-    currentDayId=dayId;currentDayLabel=dayLabel||"";
+    currentDayId=dayId||currentDayId;
     ["a-title","a-address","a-notes"].forEach(i=>document.getElementById(i).value="");
     document.getElementById("a-time").value="09:00";
     document.getElementById("a-duration").value="60";
     document.getElementById("a-cost").value="0";
     document.getElementById("ai-day-area").style.display="none";
-    document.getElementById("ai-day-actions").style.display="none";
+    document.getElementById("btn-add-sel").style.display="none";
     aiDaySugs=[];
     buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
   }
-  if(type==="place"){["p-name","p-address","p-notes"].forEach(i=>document.getElementById(i).value="");buildPills("place-cat-pills",PLACE_CATS,v=>selPlaceCat=v,()=>selPlaceCat);}
-  if(type==="expense"){["e-title","e-amount","e-notes"].forEach(i=>document.getElementById(i).value="");document.getElementById("e-date").value=today();buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);}
+  if(type==="expense"){
+    ["e-title","e-amount"].forEach(i=>document.getElementById(i).value="");
+    document.getElementById("e-date").value=today();
+    buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
+  }
   document.getElementById("modal-"+type).style.display="flex";
 };
+
 function buildEmojiGrid(){
   const g=document.getElementById("trip-emojis");
-  EMOJIS.forEach(e=>{const b=document.createElement("button");b.className="emoji-btn"+(e===selEmoji?" sel":"");b.textContent=e;b.onclick=()=>{selEmoji=e;g.querySelectorAll(".emoji-btn").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");};g.appendChild(b);});
+  EMOJIS.forEach(e=>{
+    const b=document.createElement("button");b.className="emoji-btn"+(e===selEmoji?" sel":"");b.textContent=e;
+    b.onclick=()=>{selEmoji=e;g.querySelectorAll(".emoji-btn").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");};
+    g.appendChild(b);
+  });
 }
 function buildPills(cid,items,setter,getter){
   const c=document.getElementById(cid);c.innerHTML="";
   items.forEach(item=>{
     const b=document.createElement("button");b.className="type-pill";b.textContent=item.e+" "+item.l;
-    const on=()=>{setter(item.v);c.querySelectorAll(".type-pill").forEach(x=>{x.style.background="var(--surface2)";x.style.color="var(--ink)";x.style.borderColor="var(--border)";});b.style.background=item.c||"var(--blue)";b.style.color="#fff";b.style.borderColor=item.c||"var(--blue)";};
+    const on=()=>{setter(item.v);c.querySelectorAll(".type-pill").forEach(x=>{x.style.cssText="";});b.style.background=item.c||"var(--blue)";b.style.color="#fff";b.style.borderColor=item.c||"var(--blue)";};
     b.onclick=on;if(getter()===item.v)setTimeout(on,0);c.appendChild(b);
   });
 }
@@ -546,45 +525,57 @@ const nDays=(s,e)=>Math.round((new Date(e)-new Date(s))/86400000)+1;
 function fmtDate(d){const[,m,g]=d.split("-");return`${parseInt(g)} ${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"][m-1]}`;}
 function fmtLong(d){return new Date(d+"T00:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});}
 function typeInfo(v){return ACT_TYPES.find(x=>x.v===v)||ACT_TYPES.at(-1);}
+function haversine(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
-// ── Groq API via proxy ────────────────────────────────────────────────────────
+// ── Groq ──────────────────────────────────────────────────────────────────────
 async function askAI(prompt){
   const r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error||"Errore API");
+  const d=await r.json();if(!r.ok)throw new Error(d.error||"Errore");
   return d.text.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
 }
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function loadTrips(){
   onValue(ref(db,"trips"),snap=>{
-    const el=document.getElementById("trips-grid");
-    if(!snap.exists()){el.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink3)"><div style="font-size:56px;margin-bottom:12px">🗺️</div><p style="font-size:16px;font-weight:600;margin-bottom:6px">Nessun viaggio ancora</p><p style="font-size:14px">Crea il tuo primo itinerario!</p></div>`;return;}
+    const el=document.getElementById("trips-list");
+    if(!snap.exists()){el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--ink3)"><div style="font-size:56px;margin-bottom:12px">🗺️</div><p style="font-size:17px;font-weight:700;margin-bottom:6px">Nessun viaggio ancora</p><p style="font-size:14px">Crea il tuo primo itinerario!</p></div>`;return;}
     const trips=Object.values(snap.val()).sort((a,b)=>b.createdAt-a.createdAt);
     el.innerHTML="";
     trips.forEach((trip,i)=>{
       const pct=trip.budget>0?Math.min(100,(trip.spent||0)/trip.budget*100):0;
-      const heroClass=HEROES[i%HEROES.length];
-      const wrap=document.createElement("div");wrap.className="trip-card-wrap fa";wrap.style.animationDelay=(i*.07)+"s";
-      wrap.innerHTML=`
-        <div class="trip-hero ${heroClass}">
-          <span style="position:relative;z-index:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">${trip.coverEmoji}</span>
-          <div style="position:absolute;bottom:10px;left:14px;z-index:1">
-            <div style="color:#fff;font-weight:800;font-size:17px;text-shadow:0 1px 3px rgba(0,0,0,.4)">${trip.title}</div>
-            <div style="color:rgba(255,255,255,.85);font-size:12px">${fmtDate(trip.startDate)} – ${fmtDate(trip.endDate)}</div>
+      const div=document.createElement("div");div.className="trip-card fa";div.style.animationDelay=(i*.06)+"s";
+      div.innerHTML=`
+        <div class="trip-hero ${GH[i%GH.length]}">
+          <div class="trip-hero-emoji">${trip.coverEmoji}</div>
+          <div class="trip-hero-info">
+            <h3>${trip.title}</h3>
+            <p>📍 ${trip.destination} · ${fmtDate(trip.startDate)}–${fmtDate(trip.endDate)}</p>
           </div>
+          <button class="trip-delete-btn" onclick="confirmDeleteTrip(event,'${trip.id}')">🗑️</button>
         </div>
-        <div class="trip-card-body">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:13px;color:var(--ink3)">📍 ${trip.destination}</span>
-            <span style="font-size:13px;color:var(--ink3);margin-left:auto">✈️ ${nDays(trip.startDate,trip.endDate)} giorni</span>
-          </div>
-          ${trip.budget>0?`<div style="margin-top:4px"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:4px"><span>Budget</span><span>${(trip.spent||0).toFixed(0)} / ${trip.budget} ${trip.currency}</span></div><div class="prog"><div class="prog-fill" style="width:${pct}%;background:${pct>80?"var(--red)":"var(--green)"}"></div></div></div>`:""}
+        <div class="trip-card-footer">
+          <span style="font-size:14px;color:var(--ink2);font-weight:600">✈️ ${nDays(trip.startDate,trip.endDate)} giorni</span>
+          ${trip.budget>0?`<div style="flex:1;margin:0 14px"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:4px"><span>Budget</span><span>${(trip.spent||0).toFixed(0)}/${trip.budget} ${trip.currency}</span></div><div class="prog"><div class="prog-fill" style="width:${pct}%;background:${pct>80?"var(--red)":"var(--green)"}"></div></div></div>`:"<div style='flex:1'></div>"}
+          <button class="btn btn-blue" style="height:36px;font-size:13px">Apri →</button>
         </div>`;
-      wrap.onclick=()=>openTrip(trip.id);el.appendChild(wrap);
+      div.querySelector(".btn-blue").onclick=()=>openTrip(trip.id);
+      el.appendChild(div);
     });
   });
 }
+
+// Elimina viaggio
+window.confirmDeleteTrip=(e,tripId)=>{
+  e.stopPropagation();
+  tripToDelete=tripId;
+  document.getElementById("modal-del-trip").style.display="flex";
+};
+document.getElementById("btn-confirm-del").onclick=async()=>{
+  if(!tripToDelete)return;
+  await remove(ref(db,`trips/${tripToDelete}`));
+  await remove(ref(db,`shareCodes/${(await get(ref(db,`trips/${tripToDelete}/shareCode`))).val()}`)).catch(()=>{});
+  closeModal("modal-del-trip");tripToDelete=null;
+};
 
 document.getElementById("btn-new-trip").onclick=()=>{
   selEmoji="🌍";document.getElementById("trip-emojis").querySelectorAll(".emoji-btn").forEach((b,i)=>b.classList.toggle("sel",EMOJIS[i]==="🌍"));
@@ -597,19 +588,27 @@ document.getElementById("btn-create-trip").onclick=async()=>{
   const dest=document.getElementById("t-dest").value.trim();
   const start=document.getElementById("t-start").value;
   const end=document.getElementById("t-end").value;
-  if(!title||!dest||!start||!end){alert("Compila tutti i campi obbligatori!");return;}
+  if(!title||!dest||!start||!end){alert("Compila tutti i campi!");return;}
   if(start>end){alert("La data di ritorno deve essere dopo la partenza!");return;}
   const btn=document.getElementById("btn-create-trip");btn.disabled=true;btn.textContent="Creazione...";
   try{
     const newRef=push(ref(db,"trips"));const id=newRef.key;
     const shareCode=Math.random().toString(36).substring(2,8).toUpperCase();
-    const days={};let d=new Date(start+"T00:00:00"),ord=0;
-    while(d<=new Date(end+"T00:00:00")){
-      const ds=d.toISOString().split("T")[0],did="day_"+ds;
+    const days={};
+    // FIX: usa UTC per evitare problemi di fuso orario
+    const startD=new Date(start+"T12:00:00Z");
+    const endD=new Date(end+"T12:00:00Z");
+    let d=new Date(startD),ord=0;
+    while(d<=endD){
+      const ds=d.toISOString().split("T")[0];
+      const did="day_"+ds;
       days[did]={id:did,date:ds,label:`Giorno ${ord+1}`,activities:{},order:ord};
-      d.setDate(d.getDate()+1);ord++;
+      d.setUTCDate(d.getUTCDate()+1);ord++;
     }
-    await set(newRef,{id,title,destination:dest,coverEmoji:selEmoji,startDate:start,endDate:end,currency:document.getElementById("t-currency").value,budget:parseFloat(document.getElementById("t-budget").value)||0,spent:0,days,places:{},expenses:{},createdAt:Date.now(),shareCode});
+    await set(newRef,{id,title,destination:dest,coverEmoji:selEmoji,startDate:start,endDate:end,
+      currency:document.getElementById("t-currency").value,
+      budget:parseFloat(document.getElementById("t-budget").value)||0,
+      spent:0,days,places:{},expenses:{},createdAt:Date.now(),shareCode});
     await set(ref(db,`shareCodes/${shareCode}`),id);
     closeModal("modal-trip");openTrip(id);
   }catch(e){alert("Errore: "+e.message);}
@@ -623,11 +622,14 @@ function openTrip(tripId){
   tripListener=onValue(ref(db,`trips/${tripId}`),snap=>{
     if(!snap.exists())return;
     currentTrip=snap.val();
-    renderTripShell();
-    if(currentDayId) renderDay(currentDayId);
+    renderTripHeader();
+    renderDaySelector();
+    if(currentDayId)renderDay(currentDayId);
+    if(document.getElementById("tab-budget").style.display!=="none")renderBudget();
   });
-  show("trip");switchTab("day");
-  initMap();
+  show("trip");
+  switchTab("itinerary");
+  initDayMap();
 }
 
 document.getElementById("btn-back").onclick=()=>{
@@ -635,181 +637,267 @@ document.getElementById("btn-back").onclick=()=>{
   show("home");
 };
 
-function renderTripShell(){
+function renderTripHeader(){
   const t=currentTrip;
-  document.getElementById("sb-trip-name").textContent=t.title;
-  document.getElementById("sb-trip-dest").textContent="📍 "+t.destination;
-  // Budget pill
-  if(t.budget>0){
-    const pct=Math.min(100,(t.spent||0)/t.budget*100);
-    const pill=document.getElementById("hdr-budget-pill");
-    pill.style.display="block";
-    pill.textContent=`💰 ${(t.spent||0).toFixed(0)} / ${t.budget} ${t.currency}`;
-    pill.style.color=pct>80?"var(--red)":"var(--ink3)";
-  }
-  // Sidebar giorni
+  document.getElementById("th-title").textContent=t.title;
+  document.getElementById("th-sub").textContent=`📍 ${t.destination} · ${nDays(t.startDate,t.endDate)} giorni`;
+}
+
+function renderDaySelector(){
+  const t=currentTrip;
   const days=Object.values(t.days||{}).sort((a,b)=>a.order-b.order);
-  const sb=document.getElementById("sidebar-days");sb.innerHTML="";
+  const inner=document.getElementById("day-selector-inner");inner.innerHTML="";
   days.forEach((day,i)=>{
-    const acts=Object.values(day.activities||{});
-    const div=document.createElement("div");div.className="day-item"+(currentDayId===day.id?" active":"");
-    div.innerHTML=`<div class="day-num-dot">${i+1}</div><div style="flex:1;min-width:0"><div class="day-item-label">Giorno ${i+1}</div><div class="day-item-date">${fmtDate(day.date)}</div></div><div class="day-item-count">${acts.length>0?acts.length+" att.":""}</div>`;
-    div.onclick=()=>selectDay(day.id);
-    sb.appendChild(div);
+    const acts=Object.values(day.activities||{}).length;
+    const chip=document.createElement("button");chip.className="day-chip"+(currentDayId===day.id?" active":"");
+    chip.innerHTML=`G${i+1}<span class="day-chip-date">${fmtDate(day.date)}${acts>0?` · ${acts}`:""}</span>`;
+    chip.onclick=()=>selectDay(day.id);
+    inner.appendChild(chip);
   });
-  // Auto-select primo giorno se nessuno selezionato
-  if(!currentDayId&&days.length){selectDay(days[0].id);}
+  // Auto-select primo giorno
+  if(!currentDayId&&days.length)selectDay(days[0].id);
 }
 
 function selectDay(dayId){
   currentDayId=dayId;
-  document.querySelectorAll(".day-item").forEach(el=>{
-    el.classList.toggle("active",el.querySelector(".day-item-label")&&el.onclick.toString().includes(dayId)||false);
-  });
-  // Re-render sidebar per evidenziare
-  const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
-  const sb=document.getElementById("sidebar-days");sb.innerHTML="";
-  days.forEach((day,i)=>{
-    const acts=Object.values(day.activities||{});
-    const div=document.createElement("div");div.className="day-item"+(dayId===day.id?" active":"");
-    div.innerHTML=`<div class="day-num-dot">${i+1}</div><div style="flex:1;min-width:0"><div class="day-item-label">Giorno ${i+1}</div><div class="day-item-date">${fmtDate(day.date)}</div></div><div class="day-item-count">${acts.length>0?acts.length+" att.":""}</div>`;
-    div.onclick=()=>selectDay(day.id);
-    sb.appendChild(div);
+  document.querySelectorAll(".day-chip").forEach((c,i)=>{
+    const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
+    c.classList.toggle("active",days[i]?.id===dayId);
   });
   renderDay(dayId);
+  // Scroll chip into view
+  const chips=document.querySelectorAll(".day-chip");
+  const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
+  const idx=days.findIndex(d=>d.id===dayId);
+  if(idx>=0&&chips[idx])chips[idx].scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
 }
 
-// ── RENDER GIORNATA (Timeline + Mappa) ───────────────────────────────────────
+// ── RENDER GIORNATA ───────────────────────────────────────────────────────────
 function renderDay(dayId){
   const day=currentTrip?.days?.[dayId];if(!day)return;
   const t=currentTrip;
   const acts=Object.values(day.activities||{}).sort((a,b)=>(a.time||"00:00").localeCompare(b.time||"00:00")||a.order-b.order);
-  const el=document.getElementById("day-timeline");
-  el.innerHTML="";
+  const dc=document.getElementById("day-content");dc.innerHTML="";
 
-  // Header
-  const hdr=document.createElement("div");hdr.className="timeline-header";
-  hdr.innerHTML=`<div><div class="timeline-title">${day.label}</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">${fmtLong(day.date)}</div></div><button class="btn btn-ai" onclick="openModal('activity','${day.id}','${day.label}')" style="font-size:12px;padding:7px 14px">✨ Aggiungi</button>`;
-  el.appendChild(hdr);
-
-  if(!acts.length){
-    const emp=document.createElement("div");emp.className="day-empty";
-    emp.innerHTML=`<div class="ei">✈️</div><p>Nessuna attività per questo giorno</p><button class="btn btn-ai" onclick="openModal('activity','${day.id}','${day.label}')" style="margin-top:8px">✨ Chiedi all'AI</button>`;
-    el.appendChild(emp);
-    updateMap([]);return;
+  // Mappa container
+  const mapWrap=document.createElement("div");mapWrap.className="day-map-container";
+  mapWrap.innerHTML=`<div id="day-map" style="height:100%;width:100%"></div>`;
+  // Bottone avvia navigazione
+  if(acts.filter(a=>a.lat&&a.lng&&a.lat!==0).length>0){
+    const navBtn=document.createElement("button");navBtn.className="map-nav-btn";
+    navBtn.innerHTML="🧭 Avvia navigazione";
+    navBtn.onclick=()=>startNavigation(acts.filter(a=>a.lat&&a.lng&&a.lat!==0));
+    mapWrap.appendChild(navBtn);
   }
+  dc.appendChild(mapWrap);
+
+  // Re-init mappa se necessario (dom cambiato)
+  dayMapInited=false;
+  initDayMap();
+  updateDayMap(acts);
 
   // Timeline
-  const body=document.createElement("div");body.className="timeline-body";
-  const line=document.createElement("div");line.className="timeline-line";body.appendChild(line);
+  const timeline=document.createElement("div");timeline.className="day-timeline";
 
-  acts.forEach((act,i)=>{
-    const tp=typeInfo(act.type);
-    const item=document.createElement("div");item.className="tl-item fa";item.style.animationDelay=(i*.05)+"s";
+  // Header giornata con bottone AI
+  const hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px";
+  hdr.innerHTML=`<div><div style="font-size:18px;font-weight:800">${day.label}</div><div style="font-size:13px;color:var(--ink3);margin-top:2px">${fmtLong(day.date)}</div></div><button class="btn btn-ai" onclick="openModal('activity','${day.id}')" style="height:40px;font-size:13px">✨ Pianifica AI</button>`;
+  timeline.appendChild(hdr);
 
-    // Calcola distanza/tempo con prossima attività
-    let travelHtml="";
-    if(i<acts.length-1){
-      const next=acts[i+1];
-      if(act.lat&&act.lng&&next.lat&&next.lng&&(act.lat!==0||act.lng!==0)&&(next.lat!==0||next.lng!==0)){
-        const km=haversine(act.lat,act.lng,next.lat,next.lng);
-        const mins=Math.round(km*12); // ~5km/h a piedi
-        travelHtml=`<div class="tl-travel"><div class="tl-travel-dot">🚶</div><div class="tl-travel-line"></div><div class="tl-travel-info">${km.toFixed(1)} km · ~${mins} min a piedi</div></div>`;
-      } else if(act.zone&&next.zone&&act.zone!==next.zone){
-        travelHtml=`<div class="tl-travel"><div class="tl-travel-dot">🚶</div><div class="tl-travel-line"></div><div class="tl-travel-info">Cambio zona: ${act.zone} → ${next.zone}</div></div>`;
+  if(!acts.length){
+    const emp=document.createElement("div");emp.style.cssText="text-align:center;padding:32px 16px";
+    emp.innerHTML=`<div style="font-size:48px;margin-bottom:10px">🗓️</div><p style="font-size:16px;font-weight:700;margin-bottom:6px">Nessuna attività</p><p style="font-size:14px;color:var(--ink3);margin-bottom:20px">Premi ✨ Pianifica AI per suggerimenti personalizzati</p>`;
+    timeline.appendChild(emp);
+  } else {
+    const body=document.createElement("div");
+    acts.forEach((act,i)=>{
+      const tp=typeInfo(act.type);
+      const wrap=document.createElement("div");wrap.className="act-wrap fa";wrap.style.animationDelay=(i*.06)+"s";
+
+      // Calcola distanza prossima tappa
+      let travelHtml="";
+      if(i<acts.length-1){
+        const next=acts[i+1];
+        if(act.lat&&act.lng&&next.lat&&next.lng&&act.lat!==0&&next.lat!==0){
+          const km=haversine(act.lat,act.lng,next.lat,next.lng);
+          const mins=Math.round(km*12);
+          travelHtml=`<div class="travel-seg"><div class="travel-line"></div><div class="travel-info">🚶 ${km.toFixed(1)}km · ~${mins}min</div></div>`;
+        } else if(act.zone&&next.zone&&act.zone!==next.zone){
+          travelHtml=`<div class="travel-seg"><div class="travel-line"></div><div class="travel-info">🚶 cambio zona</div></div>`;
+        }
       }
-    }
 
-    item.innerHTML=`
-      <div class="tl-dot" style="background:${tp.bg};border-color:${tp.c}">${tp.e}</div>
-      <div class="tl-card">
-        <div class="tl-card-img">
-          <img src="${ACT_IMGS[act.type]||ACT_IMGS.other}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=tl-card-img-placeholder>${tp.e}</div>'"/>
+      wrap.innerHTML=`
+        <div class="act-line">
+          <div class="act-dot" style="background:${tp.bg};border-color:${tp.c}">${tp.e}</div>
+          ${i<acts.length-1?`<div class="act-connector"></div>`:""}
         </div>
-        <div class="tl-card-body">
-          <div class="tl-card-title">${act.title}</div>
-          <div class="tl-card-meta">
-            ${act.time?`<span class="tl-meta-chip">⏰ ${act.time}</span>`:""}
-            ${act.duration?`<span class="tl-meta-chip">⏱ ${act.duration}min</span>`:""}
-            ${act.cost>0?`<span class="tl-meta-chip" style="background:#fef3c7;color:#92400e">💶 ${t.currency}${act.cost}</span>`:""}
-            ${act.zone?`<span class="tl-meta-chip" style="background:#ede9fe;color:#6d28d9">${act.zone}</span>`:""}
+        <div style="flex:1;min-width:0">
+          <div class="act-card-inner">
+            <div class="act-img">
+              <img src="${ACT_IMGS[act.type]||ACT_IMGS.other}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=act-img-placeholder>${tp.e}</div>'"/>
+            </div>
+            <div class="act-body">
+              <div class="act-title">${act.title}</div>
+              <div class="act-chips">
+                ${act.time?`<span class="chip">⏰ ${act.time}</span>`:""}
+                ${act.duration?`<span class="chip">⏱ ${act.duration}min</span>`:""}
+                ${act.cost>0?`<span class="chip" style="background:#fef3c7;color:#92400e">💶 ${t.currency}${act.cost}</span>`:""}
+                ${act.zone?`<span class="chip" style="background:#ede9fe;color:#6d28d9">${act.zone}</span>`:""}
+              </div>
+              ${act.address?`<div class="act-addr">📍 <span>${act.address}</span></div>`:""}
+              ${act.notes?`<div class="act-notes">${act.notes}</div>`:""}
+            </div>
+            <div class="act-actions">
+              ${act.lat&&act.lng&&act.lat!==0?`<button class="btn btn-white" onclick="openMaps(${act.lat},${act.lng},'${encodeURIComponent(act.title)}')" style="flex:1;height:36px;font-size:12px">🗺️ Maps</button>`:""}
+              <button class="btn btn-red" onclick="delAct('${day.id}','${act.id}',${act.cost||0})" style="height:36px;font-size:12px;${act.lat&&act.lng&&act.lat!==0?"flex:1":"flex:1"}">🗑️ Elimina</button>
+            </div>
           </div>
-          ${act.address?`<div class="tl-card-addr">📍 ${act.address}</div>`:""}
-          ${act.notes?`<div class="tl-card-notes">${act.notes}</div>`:""}
-        </div>
-      </div>
-      <button onclick="delAct('${day.id}','${act.id}',${act.cost||0})" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#fee2e2;border:none;cursor:pointer;font-size:11px;color:var(--red);display:none" class="del-btn">✕</button>
-      ${travelHtml}`;
-    item.onmouseenter=()=>item.querySelector(".del-btn").style.display="flex";
-    item.onmouseleave=()=>item.querySelector(".del-btn").style.display="none";
-    body.appendChild(item);
-  });
-  el.appendChild(body);
-  updateMap(acts);
-}
-
-// ── MAPPA ─────────────────────────────────────────────────────────────────────
-function initMap(){
-  if(leafletInited)return;leafletInited=true;
-  const L=window.L;
-  leafletMap=L.map("map",{center:[41.9028,12.4964],zoom:5,zoomControl:true});
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(leafletMap);
-  markersLayer=L.layerGroup().addTo(leafletMap);
-  routeLayer=L.layerGroup().addTo(leafletMap);
-  document.getElementById("btn-fit-map").onclick=()=>{
-    const pts=[];markersLayer.eachLayer(l=>{if(l.getLatLng)pts.push(l.getLatLng());});
-    if(pts.length>1)leafletMap.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
-    else if(pts.length===1)leafletMap.setView(pts[0],14);
-  };
-}
-
-function updateMap(acts){
-  const L=window.L;if(!leafletMap)return;
-  markersLayer.clearLayers();routeLayer.clearLayers();
-  const points=acts.filter(a=>a.lat&&a.lng&&(a.lat!==0||a.lng!==0));
-  if(!points.length){document.getElementById("map-legend").style.display="none";return;}
-  const colors=["#1a73e8","#34a853","#fa7b17","#ea4335","#9334e6","#fbbc04","#0ea5e9","#10b981"];
-  // Disegna percorso
-  const latlngs=points.map(p=>[p.lat,p.lng]);
-  if(latlngs.length>1){
-    L.polyline(latlngs,{color:"#1a73e8",weight:3,opacity:.6,dashArray:"8 6"}).addTo(routeLayer);
-  }
-  // Marker numerati
-  points.forEach((act,i)=>{
-    const tp=typeInfo(act.type);
-    const col=colors[i%colors.length];
-    const icon=L.divIcon({
-      html:`<div style="background:${col};color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3);border:2px solid #fff;font-family:var(--f)">${i+1}</div>`,
-      className:"",iconSize:[32,32],iconAnchor:[16,16]
+          ${travelHtml}
+        </div>`;
+      body.appendChild(wrap);
     });
-    L.marker([act.lat,act.lng],{icon})
-      .bindPopup(`<div style="font-family:var(--f);min-width:150px"><strong style="font-size:13px">${act.title}</strong>${act.address?`<br/><span style="font-size:11px;color:#6b7280">📍 ${act.address}</span>`:""}${act.time?`<br/><span style="font-size:11px;color:#6b7280">⏰ ${act.time}</span>`:""}</div>`)
-      .addTo(markersLayer);
-  });
-  // Fit bounds
-  if(latlngs.length>1)leafletMap.fitBounds(L.latLngBounds(latlngs),{padding:[40,40]});
-  else leafletMap.setView(latlngs[0],14);
-  setTimeout(()=>leafletMap.invalidateSize(),100);
-  // Legend
-  const leg=document.getElementById("map-legend");leg.style.display="block";
-  leg.innerHTML=points.map((a,i)=>`<div class="map-legend-item"><div class="map-legend-dot" style="background:${colors[i%colors.length]}"></div><span>${a.title.substring(0,20)}${a.title.length>20?"...":""}</span></div>`).join("");
+
+    // Totale giornata
+    const total=acts.reduce((s,a)=>s+(a.cost||0),0);
+    if(total>0){
+      const tot=document.createElement("div");
+      tot.style.cssText="text-align:right;font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:12px;margin-left:42px";
+      tot.textContent=`Totale giornata: ${t.currency} ${total.toFixed(2)}`;
+      body.appendChild(tot);
+    }
+    timeline.appendChild(body);
+  }
+
+  // Aggiungi manuale
+  const addBtn=document.createElement("button");addBtn.className="add-act-btn";
+  addBtn.innerHTML=`<span style="font-size:20px">+</span> Aggiungi attività manualmente`;
+  addBtn.onclick=()=>openModal("activity",day.id);
+  timeline.appendChild(addBtn);
+
+  dc.appendChild(timeline);
 }
 
-function haversine(lat1,lng1,lat2,lng2){
-  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+// ── MAPPE ─────────────────────────────────────────────────────────────────────
+function initDayMap(){
+  const el=document.getElementById("day-map");
+  if(!el||dayMapInited)return;
+  dayMapInited=true;
+  const L=window.L;
+  if(dayMap){dayMap.remove();dayMap=null;}
+  dayMap=L.map(el,{center:[41.9028,12.4964],zoom:5,zoomControl:false,attributionControl:false});
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(dayMap);
+  dayMarkersLayer=L.layerGroup().addTo(dayMap);
+  dayRouteLayer=L.layerGroup().addTo(dayMap);
+}
+
+function updateDayMap(acts){
+  if(!dayMap)return;
+  const L=window.L;
+  dayMarkersLayer.clearLayers();dayRouteLayer.clearLayers();
+  const pts=acts.filter(a=>a.lat&&a.lng&&a.lat!==0);
+  if(!pts.length){dayMap.setView([41.9028,12.4964],5);return;}
+  const colors=["#1a73e8","#34a853","#fa7b17","#ea4335","#9334e6","#fbbc04","#0ea5e9","#10b981"];
+  if(pts.length>1)L.polyline(pts.map(p=>[p.lat,p.lng]),{color:"#1a73e8",weight:3,opacity:.5,dashArray:"8 6"}).addTo(dayRouteLayer);
+  pts.forEach((a,i)=>{
+    const col=colors[i%colors.length];
+    const icon=L.divIcon({html:`<div style="background:${col};color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.3);border:2px solid #fff;font-family:var(--f)">${i+1}</div>`,className:"",iconSize:[30,30],iconAnchor:[15,15]});
+    L.marker([a.lat,a.lng],{icon}).bindPopup(`<b>${a.title}</b>${a.time?`<br/>⏰ ${a.time}`:""}`).addTo(dayMarkersLayer);
+  });
+  if(pts.length>1)dayMap.fitBounds(L.latLngBounds(pts.map(p=>[p.lat,p.lng])),{padding:[20,20]});
+  else dayMap.setView([pts[0].lat,pts[0].lng],15);
+  setTimeout(()=>dayMap.invalidateSize(),150);
+}
+
+window.openMaps=(lat,lng,name)=>{
+  const url=`https://maps.google.com/?q=${lat},${lng}+(${name})`;
+  window.open(url,"_blank");
+};
+
+// ── NAVIGAZIONE GUIDATA ───────────────────────────────────────────────────────
+function startNavigation(steps){
+  navSteps=steps;navIndex=0;
+  const ns=document.getElementById("nav-screen");
+  ns.style.display="flex";ns.classList.add("active");
+  // Init nav map
+  if(!navMapInited){
+    navMapInited=true;
+    const L=window.L;
+    navMap=L.map("nav-map-full",{center:[steps[0].lat,steps[0].lng],zoom:15,zoomControl:false,attributionControl:false});
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(navMap);
+    navRouteLayer=L.layerGroup().addTo(navMap);
+  }
+  renderNavStep();
+}
+
+document.getElementById("nav-close").onclick=()=>{
+  document.getElementById("nav-screen").classList.remove("active");
+  document.getElementById("nav-screen").style.display="none";
+  if(navMap){setTimeout(()=>navMap.invalidateSize(),100);}
+};
+
+document.getElementById("nav-btn-done").onclick=()=>{
+  navIndex++;
+  if(navIndex>=navSteps.length){
+    // Fine percorso
+    document.getElementById("nav-screen").classList.remove("active");
+    document.getElementById("nav-screen").style.display="none";
+    alert("🎉 Hai completato tutte le tappe della giornata!");
+    return;
+  }
+  renderNavStep();
+};
+
+document.getElementById("nav-btn-maps").onclick=()=>{
+  const step=navSteps[navIndex];
+  window.open(`https://maps.google.com/?q=${step.lat},${step.lng}+(${encodeURIComponent(step.title)})`,"_blank");
+};
+
+function renderNavStep(){
+  const step=navSteps[navIndex];
+  const L=window.L;
+  // Progress dots
+  const prog=document.getElementById("nav-progress");
+  prog.innerHTML=navSteps.map((_,i)=>`<div class="nav-prog-dot ${i<navIndex?"done":i===navIndex?"current":""}"></div>`).join("");
+  document.getElementById("nav-step-num").textContent=`Tappa ${navIndex+1} di ${navSteps.length}`;
+  document.getElementById("nav-step-title").textContent=step.title;
+  document.getElementById("nav-step-addr").innerHTML=step.address?`📍 ${step.address}`:"";
+  // Aggiorna testo bottone
+  const doneBtn=document.getElementById("nav-btn-done");
+  doneBtn.textContent=navIndex===navSteps.length-1?"✓ Fine percorso 🎉":"✓ Fatto! Prossima tappa →";
+  // Mappa
+  navRouteLayer.clearLayers();
+  // Percorso rimanente
+  const remaining=navSteps.slice(navIndex).map(s=>[s.lat,s.lng]);
+  if(remaining.length>1)L.polyline(remaining,{color:"#1a73e8",weight:4,opacity:.7}).addTo(navRouteLayer);
+  // Tappe già fatte (grigio)
+  if(navIndex>0){
+    const done=navSteps.slice(0,navIndex+1).map(s=>[s.lat,s.lng]);
+    L.polyline(done,{color:"#9ca3af",weight:3,opacity:.4}).addTo(navRouteLayer);
+  }
+  // Marker
+  navSteps.forEach((s,i)=>{
+    const done=i<navIndex;const current=i===navIndex;
+    const col=done?"#9ca3af":current?"#1a73e8":"#6b7280";
+    const icon=L.divIcon({
+      html:`<div style="background:${col};color:#fff;border-radius:50%;width:${current?36:26}px;height:${current?36:26}px;display:flex;align-items:center;justify-content:center;font-size:${current?15:12}px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.3);border:${current?3:2}px solid #fff;font-family:var(--f)">${done?"✓":i+1}</div>`,
+      className:"",iconSize:[current?36:26,current?36:26],iconAnchor:[current?18:13,current?18:13]
+    });
+    L.marker([s.lat,s.lng],{icon}).addTo(navRouteLayer);
+  });
+  navMap.setView([step.lat,step.lng],15,{animate:true,duration:.5});
+  setTimeout(()=>navMap.invalidateSize(),200);
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
-document.querySelectorAll(".trip-tab").forEach(btn=>btn.onclick=()=>switchTab(btn.dataset.tab));
+document.querySelectorAll(".bottom-tab").forEach(btn=>btn.onclick=()=>switchTab(btn.dataset.tab));
 function switchTab(tab){
-  document.querySelectorAll(".trip-tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
-  document.querySelectorAll(".tab-pane").forEach(p=>p.style.display="none");
-  document.getElementById("tab-"+tab).style.display="flex";
-  if(tab==="places"&&currentTrip)renderPlaces();
+  document.querySelectorAll(".bottom-tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  document.getElementById("tab-itinerary").style.display=tab==="itinerary"?"flex":"none";
+  document.getElementById("tab-budget").style.display=tab==="budget"?"block":"none";
   if(tab==="budget"&&currentTrip)renderBudget();
-  if(tab==="day"&&leafletMap)setTimeout(()=>leafletMap.invalidateSize(),100);
+  if(tab==="itinerary"&&dayMap)setTimeout(()=>dayMap.invalidateSize(),100);
 }
 
 // ── ATTIVITÀ ──────────────────────────────────────────────────────────────────
@@ -830,6 +918,7 @@ document.getElementById("btn-save-act").onclick=async()=>{
 };
 
 window.delAct=async(dayId,actId,cost)=>{
+  if(!confirm("Eliminare questa attività?"))return;
   await remove(ref(db,`trips/${currentTripId}/days/${dayId}/activities/${actId}`));
   if(cost>0)await update(ref(db,`trips/${currentTripId}`),{spent:Math.max(0,(currentTrip.spent||0)-cost)});
 };
@@ -839,46 +928,45 @@ document.getElementById("btn-ai-day").onclick=async()=>{
   const dest=currentTrip?.destination||"la destinazione";
   const area=document.getElementById("ai-day-area");
   const content=document.getElementById("ai-day-content");
-  area.style.display="block";
-  content.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:14px;color:var(--ink3);font-size:13px"><div class="spinner"></div>Sto cercando attività a ${dest}...</div>`;
-  document.getElementById("ai-day-actions").style.display="none";
+  area.style.display="block";document.getElementById("btn-add-sel").style.display="none";
+  content.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px;color:var(--ink3);font-size:14px"><div class="spinner"></div>Cerco attività a ${dest}...</div>`;
   aiDaySugs=[];
   const existing=Object.values(currentTrip?.days?.[currentDayId]?.activities||{}).map(a=>a.title).join(", ");
-  const prompt=`Sei un esperto di viaggi. Suggerisci 6 attività per una giornata a ${dest}.
+  const prompt=`Esperto di viaggi. Suggerisci 6 attività per una giornata a ${dest}.
 ${existing?`Già presenti (non ripetere): ${existing}.`:""}
-Raggruppa per zona geografica per minimizzare spostamenti.
-Rispondi SOLO con array JSON senza testo extra:
-[{"title":"...","type":"attraction|food|activity|shopping|transport|other","address":"...","zone":"quartiere/zona","time":"HH:MM","duration":90,"cost":15,"notes":"...","lat":0.0,"lng":0.0}]`;
+Raggruppa per zona geografica per minimizzare spostamenti. Include coordinate GPS reali e accurate.
+Rispondi SOLO con JSON array, niente testo extra:
+[{"title":"...","type":"attraction|food|activity|shopping|transport|other","address":"indirizzo completo","zone":"quartiere","time":"HH:MM","duration":90,"cost":15,"notes":"descrizione dettagliata con consigli pratici","lat":41.9028,"lng":12.4964}]`;
   try{
     const raw=await askAI(prompt);
     aiDaySugs=JSON.parse(raw);
     renderDaySugs(aiDaySugs);
   }catch(e){
-    content.innerHTML=`<div style="padding:12px;background:#fef2f2;border-radius:8px;color:var(--red);font-size:13px">⚠️ Errore nel caricamento. Riprova.</div>`;
+    content.innerHTML=`<div style="padding:12px;background:#fef2f2;border-radius:10px;color:var(--red);font-size:14px">⚠️ Errore. Riprova.</div>`;
   }
 };
 
 function renderDaySugs(sugs){
   const content=document.getElementById("ai-day-content");
   const zones={};sugs.forEach(s=>{const z=s.zone||"Generale";if(!zones[z])zones[z]=[];zones[z].push(s);});
-  let html=`<div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:500">Seleziona le attività — già ordinate per zona:</div>`;
+  let html=`<div style="font-size:12px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Seleziona le attività che vuoi aggiungere:</div>`;
   Object.entries(zones).forEach(([zone,acts])=>{
-    html+=`<div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 6px;display:flex;align-items:center;gap:6px"><span style="width:16px;height:2px;background:var(--purple);display:inline-block;border-radius:99px"></span>${zone}</div>`;
+    html+=`<div style="font-size:12px;font-weight:800;color:var(--purple);margin:12px 0 6px;display:flex;align-items:center;gap:8px"><div style="flex:1;height:1px;background:#e9d5ff"></div>${zone}<div style="flex:1;height:1px;background:#e9d5ff"></div></div>`;
     acts.forEach(s=>{
       const idx=sugs.indexOf(s);const tp=typeInfo(s.type);
-      html+=`<div class="sug-card" id="sug-${idx}" onclick="toggleSug(${idx})">
+      html+=`<div class="sug-item" id="sug-${idx}" onclick="toggleSug(${idx})">
         <div class="sug-check" id="sug-chk-${idx}">○</div>
         <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span style="font-size:15px">${tp.e}</span>
-            <span style="font-weight:700;font-size:13px">${s.title}</span>
-            ${s.time?`<span style="font-size:11px;color:var(--ink3)">⏰ ${s.time}</span>`:""}
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:18px">${tp.e}</span>
+            <span style="font-weight:800;font-size:15px">${s.title}</span>
           </div>
-          ${s.address?`<div style="font-size:11px;color:var(--ink3);margin-top:2px">📍 ${s.address}</div>`:""}
-          ${s.notes?`<div style="font-size:11px;color:var(--ink3);margin-top:2px;font-style:italic">${s.notes}</div>`:""}
-          <div style="display:flex;gap:5px;margin-top:4px">
-            ${s.duration?`<span style="font-size:10px;font-weight:600;padding:1px 6px;background:var(--surface2);border-radius:99px;color:var(--ink2)">⏱ ${s.duration}min</span>`:""}
-            ${s.cost?`<span style="font-size:10px;font-weight:600;padding:1px 6px;background:#fef3c7;border-radius:99px;color:#92400e">💶 €${s.cost}</span>`:""}
+          ${s.address?`<div style="font-size:13px;color:var(--ink3);margin-bottom:4px">📍 ${s.address}</div>`:""}
+          ${s.notes?`<div style="font-size:13px;color:var(--ink2);line-height:1.4">${s.notes}</div>`:""}
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            ${s.time?`<span style="font-size:12px;font-weight:600;padding:3px 8px;background:var(--surface2);border-radius:99px">⏰ ${s.time}</span>`:""}
+            ${s.duration?`<span style="font-size:12px;font-weight:600;padding:3px 8px;background:var(--surface2);border-radius:99px">⏱ ${s.duration}min</span>`:""}
+            ${s.cost?`<span style="font-size:12px;font-weight:600;padding:3px 8px;background:#fef3c7;border-radius:99px;color:#92400e">💶 €${s.cost}</span>`:""}
           </div>
         </div>
       </div>`;
@@ -893,13 +981,13 @@ window.toggleSug=idx=>{
   const sel=card.classList.toggle("sel");
   chk.textContent=sel?"✓":"○";
   const any=aiDaySugs.some((_,i)=>document.getElementById("sug-"+i)?.classList.contains("sel"));
-  document.getElementById("ai-day-actions").style.display=any?"block":"none";
+  document.getElementById("btn-add-sel").style.display=any?"block":"none";
 };
 
-document.getElementById("btn-add-selected").onclick=async()=>{
+document.getElementById("btn-add-sel").onclick=async()=>{
   const selected=aiDaySugs.filter((_,i)=>document.getElementById("sug-"+i)?.classList.contains("sel"));
   if(!selected.length)return;
-  const btn=document.getElementById("btn-add-selected");btn.disabled=true;btn.textContent="Aggiunta...";
+  const btn=document.getElementById("btn-add-sel");btn.disabled=true;btn.textContent="Aggiunta...";
   const optimized=optimizeOrder(selected);
   let h=9,m=0;
   for(const s of optimized){
@@ -917,51 +1005,53 @@ document.getElementById("btn-add-selected").onclick=async()=>{
   closeModal("modal-activity");btn.disabled=false;
 };
 
-// ── AI: piano intero viaggio ──────────────────────────────────────────────────
+// ── AI: piano completo ────────────────────────────────────────────────────────
 window.openAiTripPlan=async()=>{
   const t=currentTrip;
   document.getElementById("modal-ai-trip").style.display="flex";
   document.getElementById("ai-trip-actions").style.display="none";
-  document.getElementById("ai-trip-content").innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--ink3);font-size:14px"><div class="spinner"></div>Sto pianificando ${nDays(t.startDate,t.endDate)} giorni a ${t.destination}...</div>`;
+  document.getElementById("ai-trip-content").innerHTML=`<div style="display:flex;align-items:center;gap:12px;padding:20px;color:var(--ink3);font-size:15px"><div class="spinner"></div>Sto pianificando ${nDays(t.startDate,t.endDate)} giorni a ${t.destination}...</div>`;
   aiTripPlan=null;
   const days=Object.values(t.days||{}).sort((a,b)=>a.order-b.order);
-  const prompt=`Sei un esperto di viaggi. Crea un piano ottimizzato per ${nDays(t.startDate,t.endDate)} giorni a ${t.destination}.
+  const prompt=`Esperto di viaggi. Piano ottimizzato per ${nDays(t.startDate,t.endDate)} giorni a ${t.destination}.
 Budget: ${t.budget>0?`${t.currency} ${t.budget}`:"non specificato"}.
-Regole: raggruppa ogni giorno per zona geografica, alterna attrazioni/cibo/tempo libero, considera orari reali.
-Rispondi SOLO con JSON senza testo extra:
-{"days":[{"dayIndex":0,"theme":"titolo giornata","activities":[{"title":"...","type":"...","address":"...","zone":"...","time":"09:00","duration":90,"cost":10,"notes":"...","lat":0.0,"lng":0.0}]}]}`;
+Raggruppa ogni giorno per zona geografica. Coordinate GPS reali e accurate. Descrizioni dettagliate.
+SOLO JSON:
+{"days":[{"dayIndex":0,"theme":"tema giornata","activities":[{"title":"...","type":"...","address":"indirizzo completo","zone":"quartiere","time":"09:00","duration":90,"cost":10,"notes":"descrizione con consigli pratici","lat":0.0,"lng":0.0}]}]}`;
   try{
     const raw=await askAI(prompt);
     aiTripPlan=JSON.parse(raw);
     renderTripPlan(aiTripPlan);
     document.getElementById("ai-trip-actions").style.display="flex";
   }catch(e){
-    document.getElementById("ai-trip-content").innerHTML=`<div style="padding:14px;background:#fef2f2;border-radius:10px;color:var(--red);font-size:13px">⚠️ Errore. Riprova tra un momento.</div>`;
+    document.getElementById("ai-trip-content").innerHTML=`<div style="padding:14px;background:#fef2f2;border-radius:10px;color:var(--red);font-size:14px">⚠️ Errore. Riprova tra un momento.</div>`;
   }
 };
-document.getElementById("btn-ai-full").onclick=()=>openAiTripPlan();
 
 function renderTripPlan(plan){
   const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
   let html="";
   plan.days.forEach(pd=>{
     const day=days[pd.dayIndex];if(!day)return;
-    html+=`<div style="margin-bottom:20px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-      <div style="background:linear-gradient(135deg,var(--blue),var(--purple));padding:12px 16px;color:#fff">
-        <div style="font-weight:800;font-size:14px">Giorno ${pd.dayIndex+1} — ${pd.theme}</div>
-        <div style="font-size:11px;opacity:.85;margin-top:1px">${fmtLong(day.date)}</div>
-      </div>
-      <div style="padding:10px">`;
+    html+=`<div style="margin-bottom:16px;border:1.5px solid var(--border);border-radius:16px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,var(--blue),var(--purple));padding:12px 16px">
+        <div style="font-weight:800;font-size:15px;color:#fff">Giorno ${pd.dayIndex+1} — ${pd.theme}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">${fmtLong(day.date)}</div>
+      </div><div style="padding:12px">`;
     pd.activities.forEach(a=>{
       const tp=typeInfo(a.type);
-      html+=`<div style="display:flex;gap:9px;padding:8px;border-radius:8px;margin-bottom:5px;background:var(--surface)">
-        <div style="width:28px;height:28px;border-radius:8px;background:${tp.bg};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${tp.e}</div>
+      html+=`<div style="display:flex;gap:10px;padding:10px;border-radius:10px;background:var(--surface);margin-bottom:6px">
+        <div style="width:32px;height:32px;border-radius:9px;background:${tp.bg};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${tp.e}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px">${a.title} <span style="font-size:10px;font-weight:600;padding:1px 6px;background:#ede9fe;color:#6d28d9;border-radius:99px">${a.zone||""}</span></div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:2px">${a.time||""} ${a.address?"· "+a.address:""}</div>
-          ${a.notes?`<div style="font-size:11px;color:var(--ink3);font-style:italic;margin-top:1px">${a.notes}</div>`:""}
+          <div style="font-weight:800;font-size:14px">${a.title} ${a.zone?`<span style="font-size:11px;font-weight:700;padding:1px 7px;background:#ede9fe;color:#6d28d9;border-radius:99px">${a.zone}</span>`:""}</div>
+          ${a.address?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">📍 ${a.address}</div>`:""}
+          ${a.notes?`<div style="font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.4">${a.notes}</div>`:""}
+          <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">
+            ${a.time?`<span style="font-size:11px;font-weight:600;padding:2px 7px;background:#fff;border-radius:99px;border:1px solid var(--border)">⏰ ${a.time}</span>`:""}
+            ${a.duration?`<span style="font-size:11px;font-weight:600;padding:2px 7px;background:#fff;border-radius:99px;border:1px solid var(--border)">⏱ ${a.duration}min</span>`:""}
+            ${a.cost?`<span style="font-size:11px;font-weight:600;padding:2px 7px;background:#fef3c7;border-radius:99px;color:#92400e">💶 €${a.cost}</span>`:""}
+          </div>
         </div>
-        ${a.cost?`<span style="font-size:12px;font-weight:700;color:var(--orange);flex-shrink:0">€${a.cost}</span>`:""}
       </div>`;
     });
     html+="</div></div>";
@@ -971,7 +1061,7 @@ function renderTripPlan(plan){
 
 document.getElementById("btn-apply-plan").onclick=async()=>{
   if(!aiTripPlan)return;
-  const btn=document.getElementById("btn-apply-plan");btn.disabled=true;btn.textContent="Aggiunta in corso...";
+  const btn=document.getElementById("btn-apply-plan");btn.disabled=true;btn.textContent="Aggiunta...";
   const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
   for(const pd of aiTripPlan.days){
     const day=days[pd.dayIndex];if(!day)continue;
@@ -990,13 +1080,13 @@ document.getElementById("btn-apply-plan").onclick=async()=>{
       const dur=(a.duration||60)+15;m+=dur;while(m>=60){m-=60;h++;}
     }
   }
-  closeModal("modal-ai-trip");btn.disabled=false;btn.textContent="Aggiungi tutto all'itinerario 🚀";
+  closeModal("modal-ai-trip");btn.disabled=false;btn.textContent="Aggiungi tutto 🚀";
 };
 
-// ── Routing ottimizzato ───────────────────────────────────────────────────────
+// ── ROUTING ───────────────────────────────────────────────────────────────────
 function optimizeOrder(acts){
   if(!acts||acts.length<=1)return acts;
-  const withCoords=acts.filter(a=>a.lat&&a.lng&&(a.lat!==0||a.lng!==0));
+  const withCoords=acts.filter(a=>a.lat&&a.lng&&a.lat!==0);
   if(withCoords.length>2){
     const rem=[...acts];const res=[rem.shift()];
     while(rem.length){
@@ -1010,96 +1100,57 @@ function optimizeOrder(acts){
   return Object.values(zones).sort((a,b)=>b.length-a.length).flat();
 }
 
-// ── POSTI ─────────────────────────────────────────────────────────────────────
-window.filterPlaces=f=>{
-  placesFilter=f;
-  ["all","todo","visited"].forEach(x=>{const b=document.getElementById("pf-"+x);if(b)b.className="btn "+(x===f?"btn-blue":"btn-white");});
-  renderPlaces();
-};
-function renderPlaces(){
-  const places=Object.values(currentTrip.places||{});
-  const tot=places.length,vis=places.filter(p=>p.visited).length;
-  document.getElementById("places-stats").innerHTML=[
-    {l:"Totale",v:tot,c:"var(--blue)"},{l:"Da visitare",v:tot-vis,c:"var(--orange)"},{l:"Visitati",v:vis,c:"var(--green)"}
-  ].map(s=>`<div class="stat-card"><div class="stat-val" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join("");
-  const filtered=places.filter(p=>placesFilter==="all"?true:placesFilter==="visited"?p.visited:!p.visited);
-  const el=document.getElementById("places-list");
-  if(!filtered.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink3)"><div style="font-size:40px;margin-bottom:10px">📍</div><p>Nessun posto da mostrare</p></div>`;return;}
-  el.innerHTML=filtered.map(p=>{
-    const cat=PLACE_CATS.find(c=>c.v===p.category)||PLACE_CATS.at(-1);
-    return`<div class="list-card" style="opacity:${p.visited?.7:1}">
-      <div class="list-icon" style="background:var(--surface2)">${cat.e}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:14px;text-decoration:${p.visited?"line-through":""}">${p.name}</div>
-        ${p.address?`<div style="font-size:12px;color:var(--ink3);margin-top:2px">📍 ${p.address}</div>`:""}
-        ${p.notes?`<div style="font-size:12px;color:var(--ink3);margin-top:2px;font-style:italic">${p.notes}</div>`:""}
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="togglePlace('${p.id}',${p.visited})" class="btn ${p.visited?"btn-white":"btn-blue"}" style="padding:6px 12px;font-size:12px">${p.visited?"✓ Visitato":"Segna visitato"}</button>
-        <button onclick="delPlace('${p.id}')" class="btn btn-danger" style="padding:6px 10px;font-size:12px">✕</button>
-      </div>
-    </div>`;
-  }).join("");
-}
-document.getElementById("btn-save-place").onclick=async()=>{
-  const name=document.getElementById("p-name").value.trim();if(!name)return;
-  const btn=document.getElementById("btn-save-place");btn.disabled=true;
-  const id="place_"+Date.now();
-  await set(ref(db,`trips/${currentTripId}/places/${id}`),{id,name,address:document.getElementById("p-address").value.trim(),category:selPlaceCat,notes:document.getElementById("p-notes").value.trim(),lat:0,lng:0,visited:false,createdAt:Date.now()});
-  closeModal("modal-place");btn.disabled=false;
-};
-window.togglePlace=(id,cur)=>update(ref(db,`trips/${currentTripId}/places/${id}`),{visited:!cur});
-window.delPlace=id=>remove(ref(db,`trips/${currentTripId}/places/${id}`));
-
 // ── BUDGET ────────────────────────────────────────────────────────────────────
 function renderBudget(){
-  const t=currentTrip,expenses=Object.values(t.expenses||{}).sort((a,b)=>b.createdAt-a.createdAt);
+  const t=currentTrip;
+  const expenses=Object.values(t.expenses||{}).sort((a,b)=>b.createdAt-a.createdAt);
   const pct=t.budget>0?Math.min(100,(t.spent||0)/t.budget*100):0;
   const rem=t.budget>0?t.budget-(t.spent||0):null;
   document.getElementById("budget-stats").innerHTML=[
     {l:"Budget",v:t.budget>0?`${t.currency} ${t.budget.toFixed(0)}`:"—",c:"var(--blue)"},
     {l:"Speso",v:`${t.currency} ${(t.spent||0).toFixed(0)}`,c:pct>80?"var(--red)":"var(--ink)"},
-    {l:"Rimanente",v:rem!==null?`${t.currency} ${rem.toFixed(0)}`:"—",c:rem!==null&&rem<0?"var(--red)":"var(--green)"},
-  ].map(s=>`<div class="stat-card"><div class="stat-val" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join("");
+    {l:"Rimane",v:rem!==null?`${t.currency} ${Math.abs(rem).toFixed(0)}${rem<0?"🔴":""}`:"—",c:rem!==null&&rem<0?"var(--red)":"var(--green)"},
+  ].map(s=>`<div class="stat-card"><div class="stat-val" style="color:${s.c};font-size:18px">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join("");
   const bp=document.getElementById("budget-prog");
   if(t.budget>0){
-    bp.style.display="block";
-    bp.innerHTML=`<div class="card" style="padding:16px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px"><span>Utilizzo budget</span><span style="color:${pct>80?"var(--red)":"var(--ink)"}">${pct.toFixed(1)}%</span></div><div class="prog"><div class="prog-fill" style="width:${pct}%;background:${pct>80?"var(--red)":"var(--green)"}"></div></div></div>`;
-  }else bp.style.display="none";
+    bp.innerHTML=`<div style="background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px"><span>Utilizzo budget</span><span style="color:${pct>80?"var(--red)":"var(--ink)"}">${pct.toFixed(1)}%</span></div><div class="prog"><div class="prog-fill" style="width:${pct}%;background:${pct>80?"var(--red)":"var(--green)"}"></div></div></div>`;
+  }
   const bycat=EXP_CATS.map(cat=>({...cat,total:expenses.filter(e=>e.category===cat.v).reduce((s,e)=>s+e.amount,0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
-  document.getElementById("budget-cats").innerHTML=bycat.length?`<div class="card" style="padding:16px;margin-bottom:16px"><div style="font-weight:800;font-size:15px;margin-bottom:14px">Per categoria</div>${bycat.map(cat=>{const cp=(t.spent||0)>0?(cat.total/(t.spent||0))*100:0;return`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px"><span>${cat.e} ${cat.l}</span><span>${t.currency} ${cat.total.toFixed(0)} <span style="color:var(--ink3);font-weight:400">(${cp.toFixed(0)}%)</span></span></div><div class="prog"><div class="prog-fill" style="width:${cp}%;background:${cat.c}"></div></div></div>`;}).join("")}</div>`:"";
+  document.getElementById("budget-cats").innerHTML=bycat.length?`<div style="background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px"><div style="font-weight:800;font-size:15px;margin-bottom:12px">Per categoria</div>${bycat.map(cat=>{const cp=(t.spent||0)>0?(cat.total/(t.spent||0))*100:0;return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:5px"><span>${cat.e} ${cat.l}</span><span>${t.currency} ${cat.total.toFixed(0)}</span></div><div class="prog"><div class="prog-fill" style="width:${cp}%;background:${cat.c}"></div></div></div>`;}).join("")}</div>`:"";
   const el=document.getElementById("expenses-list");
-  if(!expenses.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink3)"><div style="font-size:40px;margin-bottom:10px">💳</div><p>Nessuna spesa ancora</p></div>`;return;}
+  if(!expenses.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink3)"><div style="font-size:40px;margin-bottom:10px">💳</div><p style="font-size:16px;font-weight:700">Nessuna spesa ancora</p></div>`;return;}
   el.innerHTML=expenses.map(exp=>{
     const cat=EXP_CATS.find(c=>c.v===exp.category)||EXP_CATS.at(-1);
-    return`<div class="list-card">
+    return`<div class="list-item">
       <div class="list-icon" style="background:${cat.c}20">${cat.e}</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:14px">${exp.title}</div><div style="font-size:12px;color:var(--ink3)">${exp.date}</div></div>
-      <div style="font-weight:800;font-size:16px;color:var(--ink)">${t.currency} ${exp.amount.toFixed(2)}</div>
-      <button onclick="delExp('${exp.id}',${exp.amount})" class="btn btn-danger" style="padding:6px 10px;font-size:12px">✕</button>
+      <div style="flex:1"><div style="font-weight:700;font-size:15px">${exp.title}</div><div style="font-size:12px;color:var(--ink3)">${exp.date}</div></div>
+      <div style="font-weight:800;font-size:16px;margin-right:8px">${t.currency} ${exp.amount.toFixed(2)}</div>
+      <button onclick="delExp('${exp.id}',${exp.amount})" class="btn btn-red" style="height:36px;font-size:13px;padding:0 12px">✕</button>
     </div>`;
   }).join("");
 }
 document.getElementById("btn-save-exp").onclick=async()=>{
-  const title=document.getElementById("e-title").value.trim(),amount=parseFloat(document.getElementById("e-amount").value)||0;
+  const title=document.getElementById("e-title").value.trim();
+  const amount=parseFloat(document.getElementById("e-amount").value)||0;
   if(!title||!amount)return;
   const btn=document.getElementById("btn-save-exp");btn.disabled=true;
   const id="exp_"+Date.now();
-  await set(ref(db,`trips/${currentTripId}/expenses/${id}`),{id,title,amount,currency:currentTrip.currency,category:selExpCat,date:document.getElementById("e-date").value,notes:document.getElementById("e-notes").value.trim(),createdAt:Date.now()});
+  await set(ref(db,`trips/${currentTripId}/expenses/${id}`),{id,title,amount,currency:currentTrip.currency,category:selExpCat,date:document.getElementById("e-date").value,createdAt:Date.now()});
   await update(ref(db,`trips/${currentTripId}`),{spent:(currentTrip.spent||0)+amount});
   closeModal("modal-expense");btn.disabled=false;
 };
 window.delExp=async(id,amount)=>{
+  if(!confirm("Eliminare questa spesa?"))return;
   await remove(ref(db,`trips/${currentTripId}/expenses/${id}`));
   await update(ref(db,`trips/${currentTripId}`),{spent:Math.max(0,(currentTrip.spent||0)-amount)});
 };
 
 // ── CONDIVIDI ─────────────────────────────────────────────────────────────────
-document.getElementById("btn-share-trip").onclick=()=>{
+document.getElementById("btn-trip-share").onclick=()=>{
   document.getElementById("share-code-display").textContent=currentTrip?.shareCode||"—";
   document.getElementById("modal-share").style.display="flex";
 };
-window.copyCode=()=>navigator.clipboard.writeText(currentTrip?.shareCode||"").then(()=>closeModal("modal-share"));
+window.copyCode=()=>navigator.clipboard.writeText(currentTrip?.shareCode||"").then(()=>{alert("Codice copiato!");closeModal("modal-share");});
 </script>
 </body>
 </html>
