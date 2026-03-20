@@ -97,8 +97,10 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 /* Day content: mappa sopra, timeline sotto */
 .day-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.day-map-container{height:220px;flex-shrink:0;position:relative}
+.day-map-container{height:200px;flex-shrink:0;position:relative;transition:height .3s}
+.day-map-container.collapsed{height:0;overflow:hidden}
 #day-map{height:100%;width:100%}
+.map-toggle-btn{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,.95);border:none;border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:4px;color:var(--ink2);font-family:var(--f)}
 .map-nav-btn{position:absolute;bottom:12px;right:12px;z-index:500;padding:0 16px;height:40px;border-radius:99px;background:var(--blue);color:#fff;border:none;font-family:var(--f);font-weight:700;font-size:13px;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:6px}
 .day-timeline{flex:1;overflow-y:auto;padding:16px}
 
@@ -222,7 +224,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
       <h1 id="th-title"></h1>
       <p id="th-sub"></p>
     </div>
-    <button class="icon-btn" id="btn-trip-share">🔗</button>
+
   </div>
 
   <!-- TAB CONTENT AREA -->
@@ -293,10 +295,20 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
     <div class="modal-handle"></div>
     <div class="modal-body">
       <div class="modal-title">Nuovo viaggio ✈️</div>
-      <div class="emoji-grid" id="trip-emojis"></div>
+      <!-- Cover image preview -->
+      <div id="trip-cover-wrap" style="height:140px;border-radius:14px;overflow:hidden;margin-bottom:14px;background:linear-gradient(135deg,#1a73e8,#7c3aed);position:relative;display:flex;align-items:center;justify-content:center">
+        <img id="trip-cover-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none"/>
+        <div id="trip-cover-placeholder" style="text-align:center;color:rgba(255,255,255,.8)">
+          <div style="font-size:36px;margin-bottom:4px">🌍</div>
+          <div style="font-size:12px;font-weight:600">Scrivi la destinazione per vedere l'anteprima</div>
+        </div>
+        <div id="trip-cover-loading" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.3);align-items:center;justify-content:center">
+          <div style="width:24px;height:24px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div>
+        </div>
+      </div>
       <div style="display:grid;gap:12px;margin-bottom:20px">
+        <div><label class="inp-label">Destinazione *</label><input class="inp" id="t-dest" placeholder="Es. Tokyo, Giappone" autocomplete="off"/></div>
         <div><label class="inp-label">Titolo *</label><input class="inp" id="t-title" placeholder="Es. Tokyo Adventure"/></div>
-        <div><label class="inp-label">Destinazione *</label><input class="inp" id="t-dest" placeholder="Es. Tokyo, Giappone"/></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div><label class="inp-label">Partenza</label><input class="inp" type="date" id="t-start"/></div>
           <div><label class="inp-label">Ritorno</label><input class="inp" type="date" id="t-end"/></div>
@@ -332,18 +344,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
   </div>
 </div>
 
-<!-- Condividi -->
-<div id="modal-share" class="overlay" style="display:none" onclick="closeBg(event,'modal-share')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-body" style="text-align:center">
-      <div class="modal-title">Condividi il viaggio 🔗</div>
-      <p style="color:var(--ink3);font-size:14px;margin-bottom:18px">Chiunque abbia questo codice può aprire il viaggio</p>
-      <div class="share-code" id="share-code-display"></div>
-      <button class="btn btn-blue" onclick="copyCode()" style="width:100%">📋 Copia codice</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- Aggiungi attività -->
 <div id="modal-activity" class="overlay" style="display:none" onclick="closeBg(event,'modal-activity')">
@@ -473,12 +474,47 @@ let aiDaySugs=[],aiTripPlan=null;
 let dayMap=null,dayMapInited=false,dayRouteLayer=null,dayMarkersLayer=null;
 let navMap=null,navMapInited=false,navSteps=[],navIndex=0,navRouteLayer=null;
 let tripToDelete=null;
+let currentCoverUrl="";
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-buildEmojiGrid();
 buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
 buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
 loadTrips();
+
+// ── Cover auto da Unsplash quando scrivi destinazione ─────────────────────────
+let coverDebounce=null;
+document.getElementById("t-dest").addEventListener("input",e=>{
+  clearTimeout(coverDebounce);
+  const val=e.target.value.trim();
+  if(!val){
+    document.getElementById("trip-cover-img").style.display="none";
+    document.getElementById("trip-cover-placeholder").style.display="flex";
+    currentCoverUrl="";return;
+  }
+  coverDebounce=setTimeout(()=>fetchCover(val),700);
+});
+
+async function fetchCover(query){
+  const img=document.getElementById("trip-cover-img");
+  const ph=document.getElementById("trip-cover-placeholder");
+  const loader=document.getElementById("trip-cover-loading");
+  loader.style.display="flex";
+  // Usa Unsplash Source (gratuito, no API key)
+  const url=`https://source.unsplash.com/800x400/?${encodeURIComponent(query+",travel,city")}`;
+  // Preload immagine
+  const testImg=new Image();
+  testImg.onload=()=>{
+    currentCoverUrl=url;
+    img.src=url;
+    img.style.display="block";
+    ph.style.display="none";
+    loader.style.display="none";
+  };
+  testImg.onerror=()=>{
+    loader.style.display="none";
+  };
+  testImg.src=url;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
@@ -504,14 +540,7 @@ window.openModal=(type,dayId)=>{
   document.getElementById("modal-"+type).style.display="flex";
 };
 
-function buildEmojiGrid(){
-  const g=document.getElementById("trip-emojis");
-  EMOJIS.forEach(e=>{
-    const b=document.createElement("button");b.className="emoji-btn"+(e===selEmoji?" sel":"");b.textContent=e;
-    b.onclick=()=>{selEmoji=e;g.querySelectorAll(".emoji-btn").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");};
-    g.appendChild(b);
-  });
-}
+
 function buildPills(cid,items,setter,getter){
   const c=document.getElementById(cid);c.innerHTML="";
   items.forEach(item=>{
@@ -578,8 +607,11 @@ document.getElementById("btn-confirm-del").onclick=async()=>{
 };
 
 document.getElementById("btn-new-trip").onclick=()=>{
-  selEmoji="🌍";document.getElementById("trip-emojis").querySelectorAll(".emoji-btn").forEach((b,i)=>b.classList.toggle("sel",EMOJIS[i]==="🌍"));
   ["t-title","t-dest","t-budget"].forEach(id=>document.getElementById(id).value="");
+  // Reset cover
+  document.getElementById("trip-cover-img").style.display="none";
+  document.getElementById("trip-cover-placeholder").style.display="block";
+  currentCoverUrl="";
   document.getElementById("modal-trip").style.display="flex";
 };
 
@@ -605,7 +637,7 @@ document.getElementById("btn-create-trip").onclick=async()=>{
       days[did]={id:did,date:ds,label:`Giorno ${ord+1}`,activities:{},order:ord};
       d.setUTCDate(d.getUTCDate()+1);ord++;
     }
-    await set(newRef,{id,title,destination:dest,coverEmoji:selEmoji,startDate:start,endDate:end,
+    await set(newRef,{id,title,destination:dest,coverEmoji:"🌍",coverUrl:currentCoverUrl,startDate:start,endDate:end,
       currency:document.getElementById("t-currency").value,
       budget:parseFloat(document.getElementById("t-budget").value)||0,
       spent:0,days,places:{},expenses:{},createdAt:Date.now(),shareCode});
@@ -679,13 +711,24 @@ function renderDay(dayId){
   const acts=Object.values(day.activities||{}).sort((a,b)=>(a.time||"00:00").localeCompare(b.time||"00:00")||a.order-b.order);
   const dc=document.getElementById("day-content");dc.innerHTML="";
 
-  // Mappa container
+  // Mappa container con toggle
   const mapWrap=document.createElement("div");mapWrap.className="day-map-container";
   mapWrap.innerHTML=`<div id="day-map" style="height:100%;width:100%"></div>`;
+  // Toggle mappa
+  const toggleBtn=document.createElement("button");toggleBtn.className="map-toggle-btn";
+  toggleBtn.innerHTML="▲ Nascondi mappa";
+  let mapVisible=true;
+  toggleBtn.onclick=()=>{
+    mapVisible=!mapVisible;
+    mapWrap.classList.toggle("collapsed",!mapVisible);
+    toggleBtn.innerHTML=mapVisible?"▲ Nascondi mappa":"▼ Mostra mappa";
+    if(mapVisible&&dayMap)setTimeout(()=>dayMap.invalidateSize(),320);
+  };
+  mapWrap.appendChild(toggleBtn);
   // Bottone avvia navigazione
   if(acts.filter(a=>a.lat&&a.lng&&a.lat!==0).length>0){
     const navBtn=document.createElement("button");navBtn.className="map-nav-btn";
-    navBtn.innerHTML="🧭 Avvia navigazione";
+    navBtn.innerHTML="🧭 Naviga";
     navBtn.onclick=()=>startNavigation(acts.filter(a=>a.lat&&a.lng&&a.lat!==0));
     mapWrap.appendChild(navBtn);
   }
@@ -696,7 +739,7 @@ function renderDay(dayId){
   initDayMap();
   updateDayMap(acts);
 
-  // Timeline
+  // Timeline SCROLLABILE (non la mappa)
   const timeline=document.createElement("div");timeline.className="day-timeline";
 
   // Header giornata con bottone AI
@@ -1145,12 +1188,6 @@ window.delExp=async(id,amount)=>{
   await update(ref(db,`trips/${currentTripId}`),{spent:Math.max(0,(currentTrip.spent||0)-amount)});
 };
 
-// ── CONDIVIDI ─────────────────────────────────────────────────────────────────
-document.getElementById("btn-trip-share").onclick=()=>{
-  document.getElementById("share-code-display").textContent=currentTrip?.shareCode||"—";
-  document.getElementById("modal-share").style.display="flex";
-};
-window.copyCode=()=>navigator.clipboard.writeText(currentTrip?.shareCode||"").then(()=>{alert("Codice copiato!");closeModal("modal-share");});
 </script>
 </body>
 </html>
