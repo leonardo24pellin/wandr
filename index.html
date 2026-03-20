@@ -27,7 +27,7 @@ body{background:var(--surface)}
 ::-webkit-scrollbar{display:none}
 
 /* ── Shell ── */
-#app{display:flex;flex-direction:column;height:100dvh;overflow:hidden;position:relative}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;position:relative}
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden}
 .screen.active{display:flex}
 
@@ -54,7 +54,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 /* ── Modal ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;padding:0;animation:fi .2s}
-.modal{background:#fff;border-radius:24px 24px 0 0;padding:0;width:100%;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slide-up .3s cubic-bezier(.32,1,.42,1);padding-bottom:calc(20px + var(--safe-bottom))}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:0;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slide-up .3s cubic-bezier(.32,1,.42,1);padding-bottom:20px;padding-bottom:calc(20px + var(--safe-bottom))}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0}
 .modal-body{padding:20px 20px 0}
 .modal-title{font-size:20px;font-weight:800;margin-bottom:18px}
@@ -140,7 +140,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 #nav-screen{position:fixed;inset:0;z-index:500;background:#000;display:none;flex-direction:column}
 #nav-screen.active{display:flex}
 #nav-map-full{flex:1}
-.nav-bottom-sheet{background:#fff;border-radius:24px 24px 0 0;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
+.nav-bottom-sheet{background:#fff;border-radius:24px 24px 0 0;padding:20px;padding-bottom:20px;padding-bottom:calc(20px + var(--safe-bottom));flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
 .nav-step-num{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
 .nav-step-title{font-size:22px;font-weight:800;margin-bottom:4px}
 .nav-step-addr{font-size:15px;color:var(--ink3);margin-bottom:16px;display:flex;align-items:center;gap:4px}
@@ -191,6 +191,14 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 .share-code{background:var(--ink);color:#fff;padding:20px;border-radius:14px;font-size:32px;font-weight:800;letter-spacing:.25em;font-family:monospace;text-align:center;margin-bottom:16px}
 
 /* Animations */
+.dest-wrap{position:relative}
+.dest-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:var(--shadow-lg);border:1.5px solid var(--border);z-index:9999;overflow:hidden;max-height:220px;overflow-y:auto}
+.dest-item{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;font-size:15px;font-weight:500;border-bottom:1px solid var(--border);transition:background .12s}
+.dest-item:last-child{border-bottom:none}
+.dest-item:active{background:var(--blue-light)}
+.dest-flag{font-size:22px;flex-shrink:0}
+.dest-name{font-weight:700;font-size:15px}
+.dest-sub{font-size:12px;color:var(--ink3)}
 @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fi{from{opacity:0}to{opacity:1}}
 @keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -199,7 +207,22 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 </style>
 </head>
 <body>
+<!-- Error overlay - visibile se JS crasha -->
+<div id="error-overlay" style="display:none;position:fixed;inset:0;background:#fff;z-index:9999;padding:40px 24px;font-family:system-ui">
+  <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+  <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;color:#111">Errore di caricamento</h2>
+  <p style="font-size:14px;color:#666;margin-bottom:16px">Dettaglio:</p>
+  <pre id="error-msg" style="font-size:12px;background:#f3f4f6;padding:12px;border-radius:8px;overflow:auto;color:#111;word-break:break-all;white-space:pre-wrap"></pre>
+  <button onclick="location.reload()" style="margin-top:20px;background:#1a73e8;color:#fff;border:none;border-radius:99px;padding:12px 24px;font-size:16px;font-weight:700;cursor:pointer;width:100%">🔄 Ricarica</button>
+</div>
+
 <div id="app">
+<div id="loading-screen" style="position:fixed;inset:0;background:#fff;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="font-size:56px">✈️</div>
+  <div style="font-size:22px;font-weight:800;background:linear-gradient(135deg,#1a73e8,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Wandr</div>
+  <div style="width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite"></div>
+  <p style="font-size:14px;color:#6b7280">Caricamento...</p>
+</div>
 
 <!-- ══ HOME ══ -->
 <div id="home" class="screen active">
@@ -307,7 +330,13 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
         </div>
       </div>
       <div style="display:grid;gap:12px;margin-bottom:20px">
-        <div><label class="inp-label">Destinazione *</label><input class="inp" id="t-dest" placeholder="Es. Tokyo, Giappone" autocomplete="off"/></div>
+        <div>
+          <label class="inp-label">Destinazione *</label>
+          <div class="dest-wrap">
+            <input class="inp" id="t-dest" placeholder="Es. Tokyo, Parigi, Giappone..." autocomplete="off"/>
+            <div id="dest-dropdown" class="dest-dropdown" style="display:none"></div>
+          </div>
+        </div>
         <div><label class="inp-label">Titolo *</label><input class="inp" id="t-title" placeholder="Es. Tokyo Adventure"/></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div><label class="inp-label">Partenza</label><input class="inp" type="date" id="t-start"/></div>
@@ -387,7 +416,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 <!-- AI piano completo -->
 <div id="modal-ai-trip" class="overlay" style="display:none" onclick="closeBg(event,'modal-ai-trip')">
-  <div class="modal" style="max-height:88dvh">
+  <div class="modal" style="max-height:88vh;max-height:88dvh">
     <div class="modal-handle"></div>
     <div class="modal-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -425,6 +454,26 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
   </div>
 </div>
 
+<script>
+// Cattura errori globali e mostrali sullo schermo
+window.onerror = function(msg, src, line, col, err) {
+  var ov = document.getElementById('error-overlay');
+  var em = document.getElementById('error-msg');
+  if(ov && em) {
+    em.textContent = (err ? err.stack : msg) + '\n\nFile: ' + src + '\nLinea: ' + line;
+    ov.style.display = 'block';
+  }
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  var ov = document.getElementById('error-overlay');
+  var em = document.getElementById('error-msg');
+  if(ov && em) {
+    em.textContent = 'Promise error: ' + (e.reason ? (e.reason.stack || e.reason.message || e.reason) : 'unknown');
+    ov.style.display = 'block';
+  }
+});
+</script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -480,44 +529,97 @@ let currentCoverUrl="";
 buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
 buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
 loadTrips();
+// Rimuovi loading screen
+const ls = document.getElementById('loading-screen');
+if(ls) ls.style.display='none';
 
-// ── Cover auto da Unsplash quando scrivi destinazione ─────────────────────────
-let coverDebounce=null;
+// ── Autocomplete destinazione + Cover ────────────────────────────────────────
+let destDebounce=null;
+let destConfirmed=false; // true solo dopo che l'utente ha cliccato un suggerimento
+
 document.getElementById("t-dest").addEventListener("input",e=>{
-  clearTimeout(coverDebounce);
+  clearTimeout(destDebounce);
+  destConfirmed=false;
   const val=e.target.value.trim();
-  if(!val){
-    document.getElementById("trip-cover-img").style.display="none";
-    document.getElementById("trip-cover-placeholder").style.display="flex";
-    currentCoverUrl="";return;
+  if(val.length<2){
+    document.getElementById("dest-dropdown").style.display="none";
+    resetCover();return;
   }
-  coverDebounce=setTimeout(()=>fetchCover(val),700);
+  destDebounce=setTimeout(()=>searchDest(val),500);
 });
+
+// Chiudi dropdown cliccando fuori
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".dest-wrap"))
+    document.getElementById("dest-dropdown").style.display="none";
+});
+
+async function searchDest(q){
+  try{
+    const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=it`);
+    const data=await res.json();
+    showDestDropdown(data);
+  }catch(e){console.log("Nominatim error",e);}
+}
+
+function showDestDropdown(results){
+  const dd=document.getElementById("dest-dropdown");
+  if(!results.length){dd.style.display="none";return;}
+  dd.innerHTML="";
+  results.forEach(r=>{
+    const parts=r.display_name.split(",");
+    const name=parts[0].trim();
+    const sub=parts.slice(1,3).join(",").trim();
+    // Emoji bandiera dal country code
+    const cc=(r.address?.country_code||"").toUpperCase();
+    const flag=cc?String.fromCodePoint(...[...cc].map(c=>127397+c.charCodeAt(0))):"📍";
+    const item=document.createElement("div");item.className="dest-item";
+    item.innerHTML=`<span class="dest-flag">${flag}</span><div><div class="dest-name">${name}</div><div class="dest-sub">${sub}</div></div>`;
+    item.onclick=()=>selectDest(r,name,sub,flag);
+    dd.appendChild(item);
+  });
+  dd.style.display="block";
+}
+
+function selectDest(result,name,sub,flag){
+  destConfirmed=true;
+  const fullName=`${name}${sub?", "+sub:""}`;
+  document.getElementById("t-dest").value=fullName;
+  document.getElementById("dest-dropdown").style.display="none";
+  // Auto-popola titolo se vuoto
+  if(!document.getElementById("t-title").value.trim())
+    document.getElementById("t-title").value=`Viaggio a ${name}`;
+  fetchCover(name);
+}
+
+function resetCover(){
+  document.getElementById("trip-cover-img").style.display="none";
+  document.getElementById("trip-cover-placeholder").style.display="flex";
+  currentCoverUrl="";
+}
 
 async function fetchCover(query){
   const img=document.getElementById("trip-cover-img");
   const ph=document.getElementById("trip-cover-placeholder");
   const loader=document.getElementById("trip-cover-loading");
-  loader.style.display="flex";
-  // Usa Unsplash Source (gratuito, no API key)
-  const url=`https://source.unsplash.com/800x400/?${encodeURIComponent(query+",travel,city")}`;
-  // Preload immagine
+  loader.style.display="flex";ph.style.display="none";
+  const url=`https://source.unsplash.com/800x400/?${encodeURIComponent(query+",travel,landmark")}`;
   const testImg=new Image();
   testImg.onload=()=>{
     currentCoverUrl=url;
-    img.src=url;
-    img.style.display="block";
-    ph.style.display="none";
+    img.src=url;img.style.display="block";
     loader.style.display="none";
   };
-  testImg.onerror=()=>{
-    loader.style.display="none";
-  };
+  testImg.onerror=()=>{loader.style.display="none";ph.style.display="flex";};
   testImg.src=url;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+function show(id){
+  const ls=document.getElementById('loading-screen');if(ls)ls.style.display='none';
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById(id);if(el)el.classList.add("active");
+}
 window.closeModal=id=>document.getElementById(id).style.display="none";
 window.closeBg=(e,id)=>{if(e.target.id===id)closeModal(id);};
 window.openModal=(type,dayId)=>{
@@ -553,7 +655,7 @@ const today=()=>new Date().toISOString().split("T")[0];
 const nDays=(s,e)=>Math.round((new Date(e)-new Date(s))/86400000)+1;
 function fmtDate(d){const[,m,g]=d.split("-");return`${parseInt(g)} ${["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"][m-1]}`;}
 function fmtLong(d){return new Date(d+"T00:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});}
-function typeInfo(v){return ACT_TYPES.find(x=>x.v===v)||ACT_TYPES.at(-1);}
+function typeInfo(v){return ACT_TYPES.find(x=>x.v===v)||ACT_TYPES[ACT_TYPES.length-1];}
 function haversine(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
 // ── Groq ──────────────────────────────────────────────────────────────────────
@@ -1134,7 +1236,7 @@ function optimizeOrder(acts){
     const rem=[...acts];const res=[rem.shift()];
     while(rem.length){
       let best=0,bestD=Infinity;
-      rem.forEach((a,i)=>{const d=haversine(res.at(-1).lat||0,res.at(-1).lng||0,a.lat||0,a.lng||0);if(d<bestD){bestD=d;best=i;}});
+      rem.forEach((a,i)=>{const d=haversine(res[res.length-1].lat||0,res[res.length-1].lng||0,a.lat||0,a.lng||0);if(d<bestD){bestD=d;best=i;}});
       res.push(rem.splice(best,1)[0]);
     }
     return res;
@@ -1163,7 +1265,7 @@ function renderBudget(){
   const el=document.getElementById("expenses-list");
   if(!expenses.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ink3)"><div style="font-size:40px;margin-bottom:10px">💳</div><p style="font-size:16px;font-weight:700">Nessuna spesa ancora</p></div>`;return;}
   el.innerHTML=expenses.map(exp=>{
-    const cat=EXP_CATS.find(c=>c.v===exp.category)||EXP_CATS.at(-1);
+    const cat=EXP_CATS.find(c=>c.v===exp.category)||EXP_CATS[EXP_CATS.length-1];
     return`<div class="list-item">
       <div class="list-icon" style="background:${cat.c}20">${cat.e}</div>
       <div style="flex:1"><div style="font-weight:700;font-size:15px">${exp.title}</div><div style="font-size:12px;color:var(--ink3)">${exp.date}</div></div>
@@ -1191,5 +1293,6 @@ window.delExp=async(id,amount)=>{
 // ── CONDIVIDI ─────────────────────────────────────────────────────────────────
 
 </script>
+</div><!-- end #app -->
 </body>
 </html>
