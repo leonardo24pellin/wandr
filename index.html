@@ -75,10 +75,18 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 /* ── TRIP SHELL ── */
 /* Bottom tab bar */
-.bottom-tabs{background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);flex-shrink:0;position:relative;z-index:10}
-.bottom-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;border:none;background:transparent;font-family:var(--f);color:var(--ink4);transition:color .15s;font-size:10px;font-weight:600;gap:3px}
-.bottom-tab .tab-icon{font-size:20px;transition:transform .15s}
-.bottom-tab.active{color:var(--blue)}.bottom-tab.active .tab-icon{transform:scale(1.15)}
+/* Liquid glass pill tab bar */
+.bottom-tabs-wrap{position:absolute;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);z-index:100;pointer-events:none}
+.bottom-tabs{display:flex;gap:4px;padding:6px;border-radius:99px;pointer-events:all;
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.7);
+  box-shadow:0 8px 32px rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.8) inset,0 -1px 0 rgba(0,0,0,.06) inset}
+.bottom-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 22px;cursor:pointer;border:none;background:transparent;font-family:var(--f);color:rgba(0,0,0,.5);transition:all .2s;font-size:11px;font-weight:700;gap:3px;border-radius:99px;min-width:90px}
+.bottom-tab .tab-icon{font-size:19px;transition:transform .2s}
+.bottom-tab.active{background:rgba(255,255,255,0.9);color:var(--blue);box-shadow:0 2px 12px rgba(0,0,0,.12)}
+.bottom-tab.active .tab-icon{transform:scale(1.1)}
 
 /* Trip header */
 .trip-header{background:#fff;padding:calc(var(--safe-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -88,6 +96,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 /* ── TAB: ITINERARIO ── */
 #tab-itinerary{flex:1;overflow:hidden;display:flex;flex-direction:column}
+#trip{position:relative}
 /* Day selector horizontal scroll */
 .day-selector{background:#fff;border-bottom:1px solid var(--border);padding:10px 0;flex-shrink:0}
 .day-selector-inner{display:flex;gap:8px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
@@ -97,12 +106,13 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 
 /* Day content: mappa sopra, timeline sotto */
 .day-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.day-map-container{height:200px;flex-shrink:0;position:relative;transition:height .3s}
-.day-map-container.collapsed{height:0;overflow:hidden}
-#day-map{height:100%;width:100%}
-.map-toggle-btn{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,.95);border:none;border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:4px;color:var(--ink2);font-family:var(--f)}
+.day-map-container{overflow:hidden;flex-shrink:0;position:relative;transition:height .35s cubic-bezier(.4,0,.2,1)}
+#day-map{height:100%;width:100%;min-height:200px}
+.map-toggle-bar{display:flex;align-items:center;justify-content:center;padding:6px 0;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
+.map-toggle-btn{background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;color:var(--ink2);font-family:var(--f);transition:background .15s}
+.map-toggle-btn:active{background:var(--border)}
 .map-nav-btn{position:absolute;bottom:12px;right:12px;z-index:500;padding:0 16px;height:40px;border-radius:99px;background:var(--blue);color:#fff;border:none;font-family:var(--f);font-weight:700;font-size:13px;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:6px}
-.day-timeline{flex:1;overflow-y:auto;padding:16px}
+.day-timeline{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(100px + var(--safe-bottom))}
 
 /* Activity cards */
 .act-wrap{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px}
@@ -268,7 +278,7 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
     </div>
 
     <!-- BUDGET -->
-    <div id="tab-budget" style="display:none;flex:1;overflow-y:auto;padding:16px">
+    <div id="tab-budget" style="display:none;flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(100px + var(--safe-bottom))">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <h2 style="font-size:20px;font-weight:800">Budget</h2>
         <button class="btn btn-blue" onclick="openModal('expense')" style="height:38px;font-size:13px">+ Spesa</button>
@@ -282,13 +292,15 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
   </div>
 
   <!-- Bottom tab bar -->
-  <div class="bottom-tabs">
-    <button class="bottom-tab active" data-tab="itinerary">
-      <span class="tab-icon">📅</span>Itinerario
-    </button>
-    <button class="bottom-tab" data-tab="budget">
-      <span class="tab-icon">💰</span>Budget
-    </button>
+  <div class="bottom-tabs-wrap">
+    <div class="bottom-tabs">
+      <button class="bottom-tab active" data-tab="itinerary">
+        <span class="tab-icon">📅</span>Itinerario
+      </button>
+      <button class="bottom-tab" data-tab="budget">
+        <span class="tab-icon">💰</span>Budget
+      </button>
+    </div>
   </div>
 </div>
 
@@ -612,15 +624,31 @@ async function fetchCover(query){
   const ph=document.getElementById("trip-cover-placeholder");
   const loader=document.getElementById("trip-cover-loading");
   loader.style.display="flex";ph.style.display="none";
-  const url=`https://source.unsplash.com/800x400/?${encodeURIComponent(query+",travel,landmark")}`;
-  const testImg=new Image();
-  testImg.onload=()=>{
+  try{
+    // Wikipedia API: cerca immagine principale della città
+    const wikiUrl=`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+    const res=await fetch(wikiUrl,{headers:{"Accept":"application/json"}});
+    const data=await res.json();
+    const url=data?.thumbnail?.source||data?.originalimage?.source;
+    if(url){
+      // Usa versione più grande
+      const bigUrl=url.replace(/\/\d+px-/,"/800px-");
+      currentCoverUrl=bigUrl;
+      img.src=bigUrl;img.style.display="block";
+      ph.style.display="none";
+      loader.style.display="none";
+    } else {
+      throw new Error("no image");
+    }
+  }catch(e){
+    // Fallback: Picsum con seed dalla query (sempre funziona)
+    const seed=query.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+    const url=`https://picsum.photos/seed/${seed}/800/400`;
     currentCoverUrl=url;
     img.src=url;img.style.display="block";
+    ph.style.display="none";
     loader.style.display="none";
-  };
-  testImg.onerror=()=>{loader.style.display="none";ph.style.display="flex";};
-  testImg.src=url;
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -770,6 +798,7 @@ document.getElementById("btn-create-trip").onclick=async()=>{
 function openTrip(tripId){
   if(tripListener){off(ref(db,`trips/${currentTripId}`));tripListener=null;}
   currentTripId=tripId;currentDayId=null;
+  let firstLoad=true;
   tripListener=onValue(ref(db,`trips/${tripId}`),snap=>{
     if(!snap.exists())return;
     currentTrip=snap.val();
@@ -777,10 +806,41 @@ function openTrip(tripId){
     renderDaySelector();
     if(currentDayId)renderDay(currentDayId);
     if(document.getElementById("tab-budget").style.display!=="none")renderBudget();
+    // Al primo caricamento: se non ci sono attività in nessun giorno → genera piano AI
+    if(firstLoad){
+      firstLoad=false;
+      const hasActivities=Object.values(currentTrip.days||{}).some(d=>Object.keys(d.activities||{}).length>0);
+      if(!hasActivities){
+        // Aspetta un attimo che l'UI sia pronta poi avvia AI
+        setTimeout(()=>autoGeneratePlan(),800);
+      }
+    }
   });
   show("trip");
   switchTab("itinerary");
   initDayMap();
+}
+
+async function autoGeneratePlan(){
+  // Mostra un banner invece di aprire il modal
+  const dc=document.getElementById("day-content");
+  const banner=document.createElement("div");
+  banner.id="ai-auto-banner";
+  banner.style.cssText="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:150;background:#fff;border-radius:24px;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);width:calc(100% - 48px);max-width:340px;animation:fu .3s ease";
+  banner.innerHTML=`
+    <div style="font-size:48px;margin-bottom:12px">✨</div>
+    <div style="font-size:19px;font-weight:800;margin-bottom:8px">Nessuna attività ancora</div>
+    <div style="font-size:14px;color:var(--ink3);margin-bottom:20px;line-height:1.5">Vuoi che l'AI pianifichi automaticamente il tuo viaggio a <strong>${currentTrip.destination}</strong>?</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('ai-auto-banner').remove()" class="btn btn-white" style="flex:1;height:46px">Dopo</button>
+      <button onclick="document.getElementById('ai-auto-banner').remove();openAiTripPlan()" class="btn btn-ai" style="flex:2;height:46px;font-size:14px">✨ Sì, pianifica!</button>
+    </div>`;
+  const overlay=document.createElement("div");
+  overlay.id="ai-auto-overlay";
+  overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:149;backdrop-filter:blur(4px);animation:fi .2s";
+  overlay.onclick=()=>{overlay.remove();banner.remove();};
+  document.body.appendChild(overlay);
+  document.body.appendChild(banner);
 }
 
 document.getElementById("btn-back").onclick=()=>{
@@ -830,27 +890,31 @@ function renderDay(dayId){
   const acts=Object.values(day.activities||{}).sort((a,b)=>(a.time||"00:00").localeCompare(b.time||"00:00")||a.order-b.order);
   const dc=document.getElementById("day-content");dc.innerHTML="";
 
-  // Mappa container con toggle
-  const mapWrap=document.createElement("div");mapWrap.className="day-map-container";
-  mapWrap.innerHTML=`<div id="day-map" style="height:100%;width:100%"></div>`;
-  // Toggle mappa
+  // Barra toggle SOPRA la mappa (fuori dal container)
+  const toggleBar=document.createElement("div");toggleBar.className="map-toggle-bar";
   const toggleBtn=document.createElement("button");toggleBtn.className="map-toggle-btn";
-  toggleBtn.innerHTML="▲ Nascondi mappa";
   let mapVisible=true;
+  toggleBtn.innerHTML="🗺️ Nascondi mappa";
+  const geoActs=acts.filter(a=>a.lat&&a.lng&&a.lat!==0);
   toggleBtn.onclick=()=>{
     mapVisible=!mapVisible;
-    mapWrap.classList.toggle("collapsed",!mapVisible);
-    toggleBtn.innerHTML=mapVisible?"▲ Nascondi mappa":"▼ Mostra mappa";
-    if(mapVisible&&dayMap)setTimeout(()=>dayMap.invalidateSize(),320);
+    mapWrap.style.height=mapVisible?"200px":"0px";
+    toggleBtn.innerHTML=mapVisible?"🗺️ Nascondi mappa":"🗺️ Mostra mappa";
+    if(mapVisible&&dayMap)setTimeout(()=>dayMap.invalidateSize(),380);
   };
-  mapWrap.appendChild(toggleBtn);
-  // Bottone avvia navigazione
-  if(acts.filter(a=>a.lat&&a.lng&&a.lat!==0).length>0){
-    const navBtn=document.createElement("button");navBtn.className="map-nav-btn";
+  toggleBar.appendChild(toggleBtn);
+  if(geoActs.length>0){
+    const navBtn=document.createElement("button");navBtn.className="map-toggle-btn";
+    navBtn.style.cssText="background:var(--blue);color:#fff;border-color:var(--blue);margin-left:8px";
     navBtn.innerHTML="🧭 Naviga";
-    navBtn.onclick=()=>startNavigation(acts.filter(a=>a.lat&&a.lng&&a.lat!==0));
-    mapWrap.appendChild(navBtn);
+    navBtn.onclick=()=>startNavigation(geoActs);
+    toggleBar.appendChild(navBtn);
   }
+  dc.appendChild(toggleBar);
+  // Mappa container (altezza esplicita)
+  const mapWrap=document.createElement("div");mapWrap.className="day-map-container";
+  mapWrap.style.height="200px";
+  mapWrap.innerHTML=`<div id="day-map" style="height:200px;width:100%"></div>`;
   dc.appendChild(mapWrap);
 
   // Re-init mappa se necessario (dom cambiato)
@@ -1223,7 +1287,7 @@ function renderTripPlan(plan){
 
 document.getElementById("btn-apply-plan").onclick=async()=>{
   if(!aiTripPlan)return;
-  const btn=document.getElementById("btn-apply-plan");btn.disabled=true;btn.textContent="Aggiunta...";
+  const btn=document.getElementById("btn-apply-plan");btn.disabled=true;btn.textContent="Aggiunta in corso...";
   const days=Object.values(currentTrip.days||{}).sort((a,b)=>a.order-b.order);
   for(const pd of aiTripPlan.days){
     const day=days[pd.dayIndex];if(!day)continue;
@@ -1242,7 +1306,11 @@ document.getElementById("btn-apply-plan").onclick=async()=>{
       const dur=(a.duration||60)+15;m+=dur;while(m>=60){m-=60;h++;}
     }
   }
-  closeModal("modal-ai-trip");btn.disabled=false;btn.textContent="Aggiungi tutto 🚀";
+  closeModal("modal-ai-trip");
+  btn.disabled=false;btn.textContent="Aggiungi tutto 🚀";
+  // Seleziona il primo giorno per mostrare subito il risultato
+  const firstDay=days[0];
+  if(firstDay)setTimeout(()=>selectDay(firstDay.id),300);
 };
 
 // ── ROUTING ───────────────────────────────────────────────────────────────────
