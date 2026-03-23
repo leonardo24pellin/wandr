@@ -105,11 +105,11 @@ textarea.inp{resize:none;min-height:80px;font-size:15px}
 .day-chip-date{font-size:10px;font-weight:500;display:block;margin-top:1px;opacity:.75}
 
 /* Day content: mappa sopra, timeline sotto */
-.day-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.day-map-container{overflow:hidden;flex-shrink:0;position:relative;transition:height .35s cubic-bezier(.4,0,.2,1)}
-#day-map{height:100%;width:100%;min-height:200px}
-.map-toggle-bar{display:flex;align-items:center;justify-content:center;padding:6px 0;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
-.map-toggle-btn{background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;color:var(--ink2);font-family:var(--f);transition:background .15s}
+.day-content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.day-map-container{flex-shrink:0;position:relative;transition:height .35s cubic-bezier(.4,0,.2,1);overflow:hidden}
+#day-map{position:absolute;inset:0;width:100%;height:100%}
+.map-toggle-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
+.map-toggle-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:99px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;color:var(--ink2);font-family:var(--f)}
 .map-toggle-btn:active{background:var(--border)}
 .map-nav-btn{position:absolute;bottom:12px;right:12px;z-index:500;padding:0 16px;height:40px;border-radius:99px;background:var(--blue);color:#fff;border:none;font-family:var(--f);font-weight:700;font-size:13px;cursor:pointer;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:6px}
 .day-timeline{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(100px + var(--safe-bottom))}
@@ -623,31 +623,43 @@ async function fetchCover(query){
   const img=document.getElementById("trip-cover-img");
   const ph=document.getElementById("trip-cover-placeholder");
   const loader=document.getElementById("trip-cover-loading");
-  loader.style.display="flex";ph.style.display="none";
+  loader.style.display="flex"; ph.style.display="none";
+
+  const tryLoad=(url)=>new Promise((res,rej)=>{
+    const i=new Image();
+    i.onload=()=>res(url);
+    i.onerror=rej;
+    i.src=url;
+  });
+
+  // 1. Wikimedia Commons — cerca immagine per la città
   try{
-    // Wikipedia API: cerca immagine principale della città
-    const wikiUrl=`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-    const res=await fetch(wikiUrl,{headers:{"Accept":"application/json"}});
-    const data=await res.json();
-    const url=data?.thumbnail?.source||data?.originalimage?.source;
+    const wikiRes=await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=800&origin=*`
+    );
+    const wikiData=await wikiRes.json();
+    const pages=wikiData?.query?.pages||{};
+    const page=Object.values(pages)[0];
+    const url=page?.thumbnail?.source;
     if(url){
-      // Usa versione più grande
-      const bigUrl=url.replace(/\/\d+px-/,"/800px-");
-      currentCoverUrl=bigUrl;
-      img.src=bigUrl;img.style.display="block";
-      ph.style.display="none";
-      loader.style.display="none";
-    } else {
-      throw new Error("no image");
+      await tryLoad(url);
+      currentCoverUrl=url;
+      img.src=url; img.style.display="block";
+      ph.style.display="none"; loader.style.display="none";
+      return;
     }
-  }catch(e){
-    // Fallback: Picsum con seed dalla query (sempre funziona)
-    const seed=query.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+  }catch(e){}
+
+  // 2. Fallback: immagine paesaggio da Picsum (seed deterministico dalla città)
+  try{
+    const seed=encodeURIComponent(query.toLowerCase().replace(/\s+/g,"-"));
     const url=`https://picsum.photos/seed/${seed}/800/400`;
+    await tryLoad(url);
     currentCoverUrl=url;
-    img.src=url;img.style.display="block";
-    ph.style.display="none";
-    loader.style.display="none";
+    img.src=url; img.style.display="block";
+    ph.style.display="none"; loader.style.display="none";
+  }catch(e){
+    loader.style.display="none"; ph.style.display="flex";
   }
 }
 
@@ -911,10 +923,10 @@ function renderDay(dayId){
     toggleBar.appendChild(navBtn);
   }
   dc.appendChild(toggleBar);
-  // Mappa container (altezza esplicita)
+  // Mappa container con altezza fissa
   const mapWrap=document.createElement("div");mapWrap.className="day-map-container";
   mapWrap.style.height="200px";
-  mapWrap.innerHTML=`<div id="day-map" style="height:200px;width:100%"></div>`;
+  mapWrap.innerHTML=`<div id="day-map"></div>`;
   dc.appendChild(mapWrap);
 
   // Re-init mappa se necessario (dom cambiato)
