@@ -549,18 +549,30 @@ let tripToDelete=null;
 let currentCoverUrl="";
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
-buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
-loadTrips();
-// Rimuovi loading screen
-const ls = document.getElementById('loading-screen');
-if(ls) ls.style.display='none';
+try {
+  buildPills("act-type-pills",ACT_TYPES,v=>selActType=v,()=>selActType);
+  buildPills("exp-cat-pills",EXP_CATS,v=>selExpCat=v,()=>selExpCat);
+  loadTrips();
+} catch(e) {
+  console.error("Boot error:", e);
+}
+// Rimuovi loading screen sempre
+setTimeout(()=>{
+  const ls = document.getElementById('loading-screen');
+  if(ls) ls.style.display='none';
+}, 300);
 
 // ── Autocomplete destinazione + Cover ────────────────────────────────────────
 let destDebounce=null;
-let destConfirmed=false; // true solo dopo che l'utente ha cliccato un suggerimento
+let destConfirmed=false;
 
-document.getElementById("t-dest").addEventListener("input",e=>{
+// Lazy-init: il campo t-dest è dentro un modal, non esiste al boot
+// Lo inizializziamo quando il modal viene aperto
+function initDestInput(){
+  const destEl=document.getElementById("t-dest");
+  if(!destEl||destEl._inited)return;
+  destEl._inited=true;
+  destEl.addEventListener("input",e=>{
   clearTimeout(destDebounce);
   destConfirmed=false;
   const val=e.target.value.trim();
@@ -568,14 +580,15 @@ document.getElementById("t-dest").addEventListener("input",e=>{
     document.getElementById("dest-dropdown").style.display="none";
     resetCover();return;
   }
-  destDebounce=setTimeout(()=>searchDest(val),500);
-});
+    destDebounce=setTimeout(()=>searchDest(val),500);
+  });
 
-// Chiudi dropdown cliccando fuori
-document.addEventListener("click",e=>{
-  if(!e.target.closest(".dest-wrap"))
-    document.getElementById("dest-dropdown").style.display="none";
-});
+  // Chiudi dropdown cliccando fuori
+  document.addEventListener("click",e=>{
+    if(!e.target.closest(".dest-wrap"))
+      document.getElementById("dest-dropdown").style.display="none";
+  });
+}
 
 async function searchDest(q){
   try{
@@ -795,10 +808,17 @@ document.getElementById("btn-confirm-del").onclick=async()=>{
 document.getElementById("btn-new-trip").onclick=()=>{
   ["t-title","t-dest","t-budget"].forEach(id=>document.getElementById(id).value="");
   // Reset cover
-  document.getElementById("trip-cover-img").style.display="none";
-  document.getElementById("trip-cover-placeholder").style.display="block";
+  const coverImg=document.getElementById("trip-cover-img");
+  const coverPh=document.getElementById("trip-cover-placeholder");
+  const coverWrap=document.getElementById("trip-cover-wrap");
+  if(coverImg) coverImg.style.display="none";
+  if(coverPh) coverPh.style.display="flex";
+  // Reset gradiente se era stato cambiato
+  if(coverWrap) coverWrap.style.background="linear-gradient(135deg,#1a73e8,#7c3aed)";
   currentCoverUrl="";
   document.getElementById("modal-trip").style.display="flex";
+  // Init listener destinazione ora che il modal è aperto
+  setTimeout(initDestInput, 50);
 };
 
 document.getElementById("btn-create-trip").onclick=async()=>{
